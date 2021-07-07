@@ -170,6 +170,15 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
                         content = content.Replace("</CareSiteId>", "</Id>");
                     }
 
+                    if (item.Name.Replace(".xml", "").ToLower() == "l_provider")
+                    {
+                        content = content.Replace("<Provider>", "<Providers>");
+                        content = content.Replace("</Provider>", "</Providers>");
+
+                        content = content.Replace("<ProviderId>", "<Id>");
+                        content = content.Replace("</ProviderId>", "</Id>");
+                    }
+
                     content = content.Replace("<VisitStartDate>", "<StartDate>");
                     content = content.Replace("</VisitStartDate>", "</StartDate>");
 
@@ -186,6 +195,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
                     content = content.Replace("<ConceptIdMapper>", "<ConceptIdMappers>");
                     content = content.Replace("</ConceptIdMapper>", "</ConceptIdMappers>");
 
+                    content = content.Replace("<Refills>", "<Refill>");
+                    content = content.Replace("</Refills>", "</Refill>");
+
                     var qd = new QueryDefinition().DeserializeFromXml(content);
 
                     if (qd.Persons != null)
@@ -193,19 +205,32 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
                         if (qd.Persons[0].Concepts != null && qd.Persons[0].Concepts.Length > 0)
                         {
                             var gender = qd.Persons[0].Concepts.FirstOrDefault(c => c.Name == "GenderConceptId");
-                        
                             if(gender != null)
                                 qd.Persons[0].Gender = gender.Fields[0].SourceKey;
 
-                            if (string.IsNullOrEmpty(qd.Persons[0].PersonSourceValue))
-                                qd.Persons[0].PersonSourceValue = qd.Persons[0].PersonId;
+                            var race = qd.Persons[0].Concepts.FirstOrDefault(c => c.Name == "RaceConceptId");
+                            if (race != null)
+                            {
+                                qd.Persons[0].Race = race.Fields[0].SourceKey;
+                                qd.Persons[0].RaceConceptId = race.Fields[0].ConceptId;
+                            }
+
+                            var ethnicity = qd.Persons[0].Concepts.FirstOrDefault(c => c.Name == "EthnicityConceptId");
+                            if (ethnicity != null)
+                            {
+                                qd.Persons[0].Ethnicity = ethnicity.Fields[0].SourceKey;
+                                qd.Persons[0].EthnicityConceptId = ethnicity.Fields[0].ConceptId;
+                            }
                         }
 
-                        if (qd.ObservationPeriod != null)
-                        {
-                            qd.Persons[0].StartDate = qd.ObservationPeriod[0].StartDate;
-                            qd.Persons[0].EndDate = qd.ObservationPeriod[0].EndDate;
-                        }
+                        if (string.IsNullOrEmpty(qd.Persons[0].PersonSourceValue))
+                            qd.Persons[0].PersonSourceValue = qd.Persons[0].PersonId;
+
+                        //if (qd.ObservationPeriod != null)
+                        //{
+                        //    qd.Persons[0].StartDate = qd.ObservationPeriod[0].StartDate;
+                        //    qd.Persons[0].EndDate = qd.ObservationPeriod[0].EndDate;
+                        //}
                     }
 
                     if (qd.VisitOccurrence != null)
@@ -229,6 +254,22 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
                     BatchScript = content;
                 }
             }
+
+            //var ops = SourceQueryDefinitions.Where(qd => qd.Persons == null && qd.ObservationPeriod != null);
+            //if (ops != null && ops.Count() > 0)
+            //{
+            //    var persons = SourceQueryDefinitions.Where(qd => qd.Persons != null && qd.ObservationPeriod == null);
+            //    if (persons != null && persons.Count() > 0)
+            //    {
+            //        var opQd = ops.First();
+            //        foreach (var qd in persons)
+            //        {
+            //            qd.Persons[0].StartDate = opQd.ObservationPeriod[0].StartDate;
+            //            qd.Persons[0].EndDate = opQd.ObservationPeriod[0].EndDate;
+            //        }
+            //    }
+            //}
+            
         }
 
         public string DropVocabularyTablesScript => File.ReadAllText(

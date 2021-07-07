@@ -43,7 +43,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
         {
             _queue.Aborted = true;
             _queue.State = "Aborted";
-            WriteLog(Status.Canceled, "Aborted", 100);
+            var authorization = this.HttpContext.Request.Headers["Authorization"].ToString();
+            WriteLog(authorization, Status.Canceled, "Aborted", 100);
             return "Aborted";
         }
                 
@@ -178,36 +179,61 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
         [HttpPost]
         public async Task<HttpResponseMessage> Post(CancellationToken cancellationToken, [FromBody] ConversionSettings settings)
         {
+            var authorization = this.HttpContext.Request.Headers["Authorization"].ToString();
             HttpResponseMessage returnMessage = new HttpResponseMessage();
 
-            if (settings.DestinationEngine.ToLower() == "mysql")
-                settings.DestinationEngine = "MySql";
-
-            if (settings.SourceEngine.ToLower() == "mysql")
-                settings.SourceEngine = "MySql";
-
-            _queue.QueueBackgroundWorkItem(async token =>
+            try
             {
-                await Task.Run(() =>
+                _queue.Aborted = false;
+                               
+
+                if (settings.DestinationEngine.ToLower() == "mysql")
                 {
-                    WriteLog(Status.Started, string.Empty, 0);
-                    _queue.State = "Running";
+                    settings.DestinationEngine = "MySql";
+                    settings.DestinationSchema = null;
+                }
 
-                    var conversion = new ConversionController(_queue, settings, _configuration, _logHub);
-                    conversion.Start();
+                if (settings.SourceEngine.ToLower() == "mysql")
+                {
+                    settings.SourceEngine = "MySql";
+                    settings.SourceSchema = null;
+                }
 
-                    _queue.State = "Idle";
-                    WriteLog(Status.Finished, string.Empty, 100);
+                _queue.QueueBackgroundWorkItem(async token =>
+                {
+                    await Task.Run(() =>
+                    {
+                        try
+                        {
+                            WriteLog(authorization, Status.Started, string.Empty, 0);
+                            _queue.State = "Running";
+
+                            var conversion = new ConversionController(_queue, settings, _configuration, _logHub, authorization);
+                            conversion.Start();
+
+                            _queue.State = "Idle";
+                            WriteLog(authorization, Status.Finished, string.Empty, 100);
+                        }
+                        catch (Exception e)
+                        {
+                            WriteLog(authorization, Status.Failed, e.Message, 100);
+                        }
+                    });
                 });
-            });
+            }
+            catch(Exception ex)
+            {
+                WriteLog(authorization, Status.Failed, ex.Message, 100);
+            }
 
             //WriteLog("conversion done");
             return await Task.FromResult(returnMessage);
         }
 
-        private void WriteLog(Status status, string message, Double progress)
+        private void WriteLog(string authorization, Status status, string message, Double progress)
         {
-            _logHub.Clients.All.SendAsync("Log", new LogMessage { Status = status, Text = message, Progress = progress }).Wait();
+            //_logHub.Groups.
+            _logHub.Clients.Group(authorization).SendAsync("Log", new LogMessage { Status = status, Text = message, Progress = progress }).Wait();
         }
     }   
 }

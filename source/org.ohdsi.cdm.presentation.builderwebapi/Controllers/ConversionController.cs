@@ -23,20 +23,22 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
         private Vocabulary _vocabulary;
         private IHubContext<LogHub> _logHub;
         private IBackgroundTaskQueue _taskQueue;
+        private string _authorization;
 
-        public ConversionController(IBackgroundTaskQueue taskQueue, ConversionSettings settings, IConfiguration configuration, IHubContext<LogHub> logHub)
+        public ConversionController(IBackgroundTaskQueue taskQueue, ConversionSettings settings, IConfiguration configuration, IHubContext<LogHub> logHub, string authorization)
         {
             _logHub = logHub;
             _settings = new Settings(settings, configuration);
 
             _settings.Load();
-            _vocabulary = new Vocabulary(_settings, _logHub);
+            _vocabulary = new Vocabulary(_settings, _logHub, authorization);
             _taskQueue = taskQueue;
+            _authorization = authorization;
         }
 
         private void WriteLog(Status status, string message, Double progress)
         {
-            _logHub.Clients.All.SendAsync("Log", new LogMessage { Status = status, Text = message, Progress = progress }).Wait();
+            _logHub.Clients.Group(_authorization).SendAsync("Log", new LogMessage { Status = status, Text = message, Progress = progress }).Wait();
         }
 
         public bool CreateDestination()
@@ -229,10 +231,11 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             if (string.IsNullOrEmpty(sql)) return;
 
             var keys = new Dictionary<string, bool>();
-            using (var connection = new OdbcConnection(_settings.SourceConnectionString))
+            using var connection = _settings.SourceEngine.GetConnection(_settings.SourceConnectionString);
+            //using (var connection = new OdbcConnection(_settings.SourceConnectionString))
             {
-                connection.Open();
-                using (var c = new OdbcCommand(sql, connection))
+                //using (var c = new OdbcCommand(sql, connection))
+                using (var c = _settings.SourceEngine.GetCommand(sql, connection))
                 {
                     c.CommandTimeout = 30000;
                     using (var reader = c.ExecuteReader())
@@ -278,7 +281,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             var step = 100.0 / chunksCount;
             var total = 0.0;
 
-            _logHub.Clients.All.SendAsync("Progress", total.ToString()).Wait();
+            _logHub.Clients.Group(_authorization).SendAsync("Progress", total.ToString()).Wait();
 
             var save = Task.Run(() =>
                 {
@@ -311,7 +314,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                             WriteLog(Status.Running, string.Format("{0}| {1}", DateTime.Now, $"ChunkId={data.ChunkData.ChunkId} was saved - {timer.ElapsedMilliseconds} ms | {GC.GetTotalMemory(false) / 1024f / 1024f} Mb"), total);
                         }
 
-                        _logHub.Clients.All.SendAsync("Progress", Convert.ToInt32(total).ToString()).Wait();
+                        _logHub.Clients.Group(_authorization).SendAsync("Progress", Convert.ToInt32(total).ToString()).Wait();
                     }
                 });
 
@@ -320,19 +323,25 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             Parallel.For(0, chunksCount,
                 new ParallelOptions { MaxDegreeOfParallelism = degreeOfParallelism }, (chunkId, state) =>
                 {
+                    try
+                    {
+                        if (_taskQueue.Aborted) return;
 
-                    if (_taskQueue.Aborted) return;
+                        var chunk = new DatabaseChunkBuilder(chunkId);
 
-                    var chunk = new DatabaseChunkBuilder(chunkId);
+                        //using var connection =
+                        //    new OdbcConnection(_settings.SourceConnectionString);
 
-                    //using var connection =
-                    //    new OdbcConnection(_settings.SourceConnectionString);
-
-                    //connection.Open();
-                    saveQueue.Add(chunk.Process(_settings.SourceEngine,
-                        _settings.ConversionSettings.SourceSchema,
-                        _settings.SourceQueryDefinitions,
-                        _settings.SourceConnectionString));
+                        //connection.Open();
+                        saveQueue.Add(chunk.Process(_settings.SourceEngine,
+                            _settings.ConversionSettings.SourceSchema,
+                            _settings.SourceQueryDefinitions,
+                            _settings.SourceConnectionString));
+                    }
+                    catch(Exception e)
+                    {
+                        _logHub.Clients.Group(_authorization).SendAsync("Log", new LogMessage { Status = Status.Failed, Text = "Error occurred executing. " + e.Message, Progress = 0 }).Wait();
+                    }
                 });
 
             saveQueue.CompleteAdding();
