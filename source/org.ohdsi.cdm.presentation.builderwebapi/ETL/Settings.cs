@@ -8,19 +8,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 
-namespace org.ohdsi.cdm.presentation.builderwebapi
+namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
 {
     public class Settings
     {
-        private readonly IConfiguration _configuration;
+        //private readonly IConfiguration _configuration;
+        private readonly string _filesManagerUrl;
+        private readonly Dictionary<string, string> _connectionStringTemplates;
 
         public CdmVersions Cdm
         {
             get
             {
-                if (ConversionSettings.CdmVersion.ToLower() == "v6.0")
+                if (ConversionSettings.CdmVersion.ToLower().Contains("6.0"))
                     return CdmVersions.V6;
+
+                if (ConversionSettings.CdmVersion.ToLower().Contains("5.4"))
+                    return CdmVersions.V54;
 
                 return CdmVersions.V53;
             }
@@ -30,8 +36,11 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
         {
             get
             {
-                if (ConversionSettings.CdmVersion.ToLower() == "v6.0")
+                if (ConversionSettings.CdmVersion.ToLower().Contains("6.0"))
                     return "v6.0";
+
+                if (ConversionSettings.CdmVersion.ToLower().Contains("5.4"))
+                    return "v5.4";
 
                 return "v5.3";
             }
@@ -41,7 +50,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
         {
             get
             {
-                if (ConversionSettings.SourceEngine.ToLower() == "postgre")
+                if (ConversionSettings.SourceEngine.ToLower() == "postgre" ||
+                    ConversionSettings.SourceEngine.ToLower() == "postgresql" ||
+                    ConversionSettings.SourceEngine.ToLower().Contains("postgre"))
                     return new PostgreDatabaseEngine();
 
                 if (ConversionSettings.SourceEngine.ToLower() == "mysql")
@@ -55,7 +66,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
         {
             get
             {
-                if (ConversionSettings.DestinationEngine.ToLower() == "postgre")
+                if (ConversionSettings.DestinationEngine.ToLower() == "postgre" ||
+                    ConversionSettings.DestinationEngine.ToLower() == "postgresql" ||
+                    ConversionSettings.DestinationEngine.ToLower().Contains("postgre"))
                     return new PostgreDatabaseEngine();
 
                 if (ConversionSettings.DestinationEngine.ToLower() == "mysql")
@@ -69,7 +82,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
         {
             get
             {
-                if (ConversionSettings.VocabularyEngine.ToLower() == "postgre")
+                if (ConversionSettings.VocabularyEngine.ToLower() == "postgre" || 
+                    ConversionSettings.VocabularyEngine.ToLower() == "postgresql" || 
+                    ConversionSettings.VocabularyEngine.ToLower().Contains("postgre"))
                     return new PostgreDatabaseEngine();
 
                 if (ConversionSettings.VocabularyEngine.ToLower() == "mysql")
@@ -124,14 +139,16 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
 
         public List<QueryDefinition> SourceQueryDefinitions { get; private set; }
 
-        public Settings(ConversionSettings settings, IConfiguration configuration)
+        public Settings(ConversionSettings settings, string filesManagerUrl, Dictionary<string, string> connectionStringTemplates)
         {
-            _configuration = configuration;
             Folder = AppContext.BaseDirectory;
 
             ConversionSettings = settings;
             Lookups = new Dictionary<string, string>();
             SourceQueryDefinitions = new List<QueryDefinition>();
+            _filesManagerUrl = filesManagerUrl;
+
+            _connectionStringTemplates = connectionStringTemplates;
         }
 
         public void Load()
@@ -139,14 +156,23 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
             var mappingsDir = Path.Combine(Folder, "mappings");
             var mappingsFile = Path.Combine(mappingsDir, ConversionSettings.MappingsName + ".zip");
 
-            using ZipArchive archive = ZipFile.OpenRead(mappingsFile);
+            var actionUrl = _filesManagerUrl;
+            actionUrl += $"/{ConversionSettings.ContentKey}";
+            using var client = new HttpClient();
+            var data = client.GetByteArrayAsync(actionUrl);
+            data.Wait();
+            using MemoryStream memoryStream = new MemoryStream();
+            memoryStream.Write(data.Result, 0, data.Result.Length);
+
+            //using ZipArchive archive = ZipFile.OpenRead(mappingsFile);
+            using ZipArchive archive = new ZipArchive(memoryStream);
             foreach (var item in archive.Entries)
             {
                 using var stream = item.Open();
                 using StreamReader reader = new StreamReader(stream);
 
                 var content = reader.ReadToEnd();
-                if (item.FullName.StartsWith("Definitions"))
+                if (item.FullName.StartsWith("Definitions", StringComparison.OrdinalIgnoreCase))
                 {
                     // TMP
                     content = content.Replace("<Person>", "<Persons>");
@@ -205,7 +231,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
                         if (qd.Persons[0].Concepts != null && qd.Persons[0].Concepts.Length > 0)
                         {
                             var gender = qd.Persons[0].Concepts.FirstOrDefault(c => c.Name == "GenderConceptId");
-                            if(gender != null)
+                            if (gender != null)
                                 qd.Persons[0].Gender = gender.Fields[0].SourceKey;
 
                             var race = qd.Persons[0].Concepts.FirstOrDefault(c => c.Name == "RaceConceptId");
@@ -225,12 +251,6 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
 
                         if (string.IsNullOrEmpty(qd.Persons[0].PersonSourceValue))
                             qd.Persons[0].PersonSourceValue = qd.Persons[0].PersonId;
-
-                        //if (qd.ObservationPeriod != null)
-                        //{
-                        //    qd.Persons[0].StartDate = qd.ObservationPeriod[0].StartDate;
-                        //    qd.Persons[0].EndDate = qd.ObservationPeriod[0].EndDate;
-                        //}
                     }
 
                     if (qd.VisitOccurrence != null)
@@ -245,31 +265,15 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
                     qd.FileName = item.Name.Replace(".xml", "");
                     SourceQueryDefinitions.Add(qd);
                 }
-                else if (item.FullName.StartsWith("Lookups"))
+                else if (item.FullName.StartsWith("Lookups", StringComparison.OrdinalIgnoreCase))
                 {
                     Lookups.Add(item.Name.Replace(".sql", ""), content);
                 }
-                else if (item.FullName.StartsWith("Batch.sql"))
+                else if (item.FullName.StartsWith("Batch.sql", StringComparison.OrdinalIgnoreCase))
                 {
                     BatchScript = content;
                 }
             }
-
-            //var ops = SourceQueryDefinitions.Where(qd => qd.Persons == null && qd.ObservationPeriod != null);
-            //if (ops != null && ops.Count() > 0)
-            //{
-            //    var persons = SourceQueryDefinitions.Where(qd => qd.Persons != null && qd.ObservationPeriod == null);
-            //    if (persons != null && persons.Count() > 0)
-            //    {
-            //        var opQd = ops.First();
-            //        foreach (var qd in persons)
-            //        {
-            //            qd.Persons[0].StartDate = opQd.ObservationPeriod[0].StartDate;
-            //            qd.Persons[0].EndDate = opQd.ObservationPeriod[0].EndDate;
-            //        }
-            //    }
-            //}
-            
         }
 
         public string DropVocabularyTablesScript => File.ReadAllText(
@@ -303,9 +307,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
 
         private string GetConnectionString(string dbType, string server, string db, string user, string pswd, string port)
         {
-            return _configuration[dbType].Replace("{server}", server).Replace("{database}", db).Replace("{username}", user)
+            return _connectionStringTemplates[dbType].Replace("{server}", server).Replace("{database}", db).Replace("{username}", user)
                 .Replace("{password}", pswd).Replace("{port}", port);
         }
-
     }
 }

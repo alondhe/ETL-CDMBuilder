@@ -1,18 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Odbc;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using org.ohdsi.cdm.framework.desktop.Helpers;
-using org.ohdsi.cdm.presentation.builderwebapi.Hubs;
+using org.ohdsi.cdm.presentation.builderwebapi.Database;
+using org.ohdsi.cdm.presentation.builderwebapi.Enums;
+using org.ohdsi.cdm.presentation.builderwebapi.ETL;
+using org.ohdsi.cdm.presentation.builderwebapi.Extensions;
+using org.ohdsi.cdm.presentation.builderwebapi.Log;
 
 namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
 {
@@ -20,31 +21,63 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
     [Route("cdm-builder/api")]
     public class CdmBuilderController : ControllerBase
     {
-        private readonly IHubContext<LogHub> _logHub;
         private readonly IBackgroundTaskQueue _queue;
-        private IConfiguration _configuration;
+        private IConfiguration _conf;
 
-        public CdmBuilderController(IConfiguration configuration, IHubContext<LogHub> hub, IBackgroundTaskQueue queue)
+        public CdmBuilderController(IConfiguration configuration, IBackgroundTaskQueue queue)
         {
-            _logHub = hub;
             _queue = queue;
-            _configuration = configuration;
+            _conf = configuration;
         }
 
         [HttpGet]
         public string Get()
         {
-            return _queue.State;
+            return "Running...";
         }
 
-
-        [HttpGet("abort")]
-        public string Abort()
+        [HttpGet]
+        [Route("log")]
+        public ConversionLogMessage GetLog(int conversionId, int? logId)
         {
-            _queue.Aborted = true;
-            _queue.State = "Aborted";
-            var authorization = this.HttpContext.Request.Headers["Authorization"].ToString();
-            WriteLog(authorization, Status.Canceled, "Aborted", 100);
+            var message = new ConversionLogMessage() { id = conversionId, logs = new List<Log.Message>(), statusName = "IN_PROGRESS", statusCode = 1 };
+            var connectionString = $"Server={_conf["SharedDbHost"]};Port={_conf["SharedDbPort"]};Database={_conf["SharedDbName"]};User Id={_conf["SharedDbBuilderUser"]};Password={_conf["SharedDbBuilderPass"]};";
+            foreach (var l in DBBuilder.GetLog(connectionString, conversionId, logId))
+            {
+                if(l.percent == 100)
+                {
+                    message.statusName = "COMPLETED";
+                    message.statusCode = 2;
+                }
+
+                if (l.statusName == "Error")
+                {
+                    message.statusName = "FAILED";
+                    message.statusCode = 4;
+                }
+
+                message.logs.Add(l);
+            }
+
+            if (DBBuilder.IsConversionAborted(connectionString, conversionId))
+            {
+                message.statusName = "ABORTED";
+                message.statusCode = 3;
+            }
+
+            return message;
+        }
+
+        [HttpGet]
+        [Route("abort")]
+        public string Abort(int conversionId)
+        {
+            var username = this.HttpContext.Request.Headers["username"].ToString();
+            var connectionString = $"Server={_conf["SharedDbHost"]};Port={_conf["SharedDbPort"]};Database={_conf["SharedDbName"]};User Id={_conf["SharedDbBuilderUser"]};Password={_conf["SharedDbBuilderPass"]};";
+
+            DBBuilder.AbortConversion(connectionString, conversionId);
+            Logger.Write(connectionString, new LogMessage { User = username, ConversionId = conversionId, Type = LogType.Info, Text = "Conversion aborted." });
+
             return "Aborted";
         }
                 
@@ -113,7 +146,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
 
         private void ChekConnectionString(string dbType, string server, string db, string user, string pswd, string port)
         {
-            var connection = _configuration[dbType].Replace("{server}", server)
+            var connection = _conf[dbType].Replace("{server}", server)
                                                    .Replace("{database}", db)
                                                    .Replace("{username}", user)
                                                    .Replace("{password}", pswd)
@@ -136,7 +169,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
 
             try
             {
-                var cs = _configuration[settings.VocabularyEngine]
+                var cs = _conf[settings.VocabularyEngine]
                     .Replace("{server}", settings.VocabularyServer)
                     .Replace("{database}", settings.VocabularyDatabase)
                     .Replace("{username}", settings.VocabularyUser)
@@ -159,33 +192,88 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
         }
 
         [HttpPost("addmappings")]
-        public async Task<IActionResult> AddMappings([FromForm] Mappings mappings)
+        public async Task<ConversionLogMessage> AddMappings([FromForm] Mappings mappings)
         {
-            var dir = Path.Combine(AppContext.BaseDirectory, "mappings");
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
+            int? conversionId = null;
+            var connectionString = $"Server={_conf["SharedDbHost"]};Port={_conf["SharedDbPort"]};Database={_conf["SharedDbName"]};User Id={_conf["SharedDbBuilderUser"]};Password={_conf["SharedDbBuilderPass"]};";
+            var username = this.HttpContext.Request.Headers["username"].ToString();
+            var actionUrl = _conf["FilesManagerUrl"] + "/api";
+            var key = _conf["BuilderSecretKey"];
 
-            var filePath = Path.Combine(dir, mappings.Name + ".zip");
-
-            using (var stream = System.IO.File.Create(filePath))
+            Logger.Write(connectionString, new LogMessage { User = username, Type = LogType.Debug, Text = $"AddMappings {username} | {actionUrl}" });
+            try
             {
-                await mappings.File.CopyToAsync(stream);
+                conversionId = DBBuilder.AddConversion(connectionString, username, mappings.Name);
+
+                Logger.Write(connectionString, new LogMessage { User = username, Type = LogType.Debug, Text = $"AddMappings conversionId {conversionId.Value}" });
+
+                using (var client = new HttpClient())
+                using (var formData = new MultipartFormDataContent())
+                {
+                    formData.Add(new StringContent(username), "username");
+                    formData.Add(new StringContent(mappings.Name), "dataKey");
+
+                    var file = mappings.File.OpenReadStream().GetByteArray();
+                    formData.Add(new ByteArrayContent(file), "file", "file.zip");
+
+                    Logger.Write(connectionString, new LogMessage { User = username, Type = LogType.Debug, Text = $"AddMappings stream opened" });
+
+                    var response = await client.PostAsync(actionUrl, formData);
+                    var content = response.Content.ReadAsStringAsync();
+                    content.Wait();
+
+                    Logger.Write(connectionString, new LogMessage { User = username, Type = LogType.Debug, Text = $"AddMappings data saved" });
+                    Logger.Write(connectionString, new LogMessage { User = username, Type = LogType.Debug, Text = response.ToString() });
+
+                    dynamic data = JToken.Parse(content.Result);
+                    string contentKey = data.id;
+
+                    Logger.Write(connectionString, new LogMessage { User = username, Type = LogType.Debug, Text = $"AddMappings contentKey {contentKey}" });
+                    
+                    DBBuilder.StoreParameters(connectionString, key, conversionId.Value, new List<Tuple<string, string>>() { new Tuple<string, string>("ContentKey", contentKey) });
+
+                    Logger.Write(connectionString, new LogMessage { User = username, Type = LogType.Debug, Text = $"AddMappings parameters stored" });
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return new ConversionLogMessage() { id = conversionId.Value, statusName = "FAILED", statusCode = 4 };
+                    }
+                }
             }
-
-            return Ok();
+            catch (Exception e)
+            {
+                Logger.Write(connectionString, new LogMessage { User = username, ConversionId = conversionId, Type = LogType.Error, Text = e.Message });
+                return new ConversionLogMessage() { id = conversionId.Value, statusName = "FAILED", statusCode = 4, logs = new List<Message> { new Message { message = e.Message } } };
+            }
+                        
+            return new ConversionLogMessage() { id = conversionId.Value, statusName = "IN_PROGRESS", statusCode = 1 };
         }
-
 
         [HttpPost]
         public async Task<HttpResponseMessage> Post(CancellationToken cancellationToken, [FromBody] ConversionSettings settings)
         {
-            var authorization = this.HttpContext.Request.Headers["Authorization"].ToString();
-            HttpResponseMessage returnMessage = new HttpResponseMessage();
+            var username = this.HttpContext.Request.Headers["username"].ToString();
+            var connectionString = $"Server={_conf["SharedDbHost"]};Port={_conf["SharedDbPort"]};Database={_conf["SharedDbName"]};User Id={_conf["SharedDbBuilderUser"]};Password={_conf["SharedDbBuilderPass"]};";
+            int conversionId = int.Parse(settings.ConversionId.ToString());
 
             try
             {
-                _queue.Aborted = false;
-                               
+                if (settings.SourceEngine == null)
+                {
+                    settings.SourceEngine = _conf["SourceDbType"];
+                    settings.SourceServer = _conf["SourceDbHost"];
+                    settings.SourcePort = _conf["SourceDbPort"];
+                    settings.SourceDatabase = _conf["SourceDbName"];
+                    settings.SourceUser = _conf["SourceDbUser"];
+                    settings.SourcePassword = _conf["SourceDbPass"];
+
+                    settings.SourceSchema = username;
+                }
+                else if (settings.SourceEngine.ToLower() == "mysql")
+                {
+                    settings.SourceEngine = "MySql";
+                    settings.SourceSchema = null;
+                }
 
                 if (settings.DestinationEngine.ToLower() == "mysql")
                 {
@@ -193,11 +281,19 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                     settings.DestinationSchema = null;
                 }
 
-                if (settings.SourceEngine.ToLower() == "mysql")
+                if (settings.VocabularyEngine == null)
                 {
-                    settings.SourceEngine = "MySql";
-                    settings.SourceSchema = null;
+                    settings.VocabularyEngine = _conf["VocabularyDbType"];
+                    settings.VocabularyServer = _conf["VocabularyDbHost"];
+                    settings.VocabularyPort = _conf["VocabularyDbPort"];
+                    settings.VocabularyDatabase = _conf["VocabularyDbName"];
+                    settings.VocabularySchema = _conf["VocabularyDbSchema"];
+                    settings.VocabularyUser = _conf["VocabularyDbUser"];
+                    settings.VocabularyPassword = _conf["VocabularyDbPass"];
                 }
+
+                var key = _conf["BuilderSecretKey"];
+                var properties = ConversionSettings.GetProperties(settings);
 
                 _queue.QueueBackgroundWorkItem(async token =>
                 {
@@ -205,35 +301,23 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                     {
                         try
                         {
-                            WriteLog(authorization, Status.Started, string.Empty, 0);
-                            _queue.State = "Running";
-
-                            var conversion = new ConversionController(_queue, settings, _configuration, _logHub, authorization);
-                            conversion.Start();
-
-                            _queue.State = "Idle";
-                            WriteLog(authorization, Status.Finished, string.Empty, 100);
+                            DBBuilder.AddConversion(connectionString, username, settings.MappingsName);
+                            Logger.Write(connectionString, new LogMessage { User = username, ConversionId = conversionId, Type = LogType.Info, Text = "Conversion started" });
+                            DBBuilder.StoreParameters(connectionString, key, conversionId, properties);
                         }
                         catch (Exception e)
                         {
-                            WriteLog(authorization, Status.Failed, e.Message, 100);
+                            Logger.Write(connectionString, new LogMessage { User = username, ConversionId = conversionId, Type = LogType.Error, Text = e.Message });
                         }
                     });
                 });
             }
             catch(Exception ex)
             {
-                WriteLog(authorization, Status.Failed, ex.Message, 100);
+                Logger.Write(connectionString, new LogMessage { User = username, ConversionId = conversionId, Type = LogType.Error, Text = ex.Message });
             }
-
-            //WriteLog("conversion done");
-            return await Task.FromResult(returnMessage);
-        }
-
-        private void WriteLog(string authorization, Status status, string message, Double progress)
-        {
-            //_logHub.Groups.
-            _logHub.Clients.Group(authorization).SendAsync("Log", new LogMessage { Status = status, Text = message, Progress = progress }).Wait();
+  
+            return await Task.FromResult(new HttpResponseMessage() { StatusCode = HttpStatusCode.OK });
         }
     }   
 }
