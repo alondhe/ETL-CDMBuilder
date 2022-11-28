@@ -32,10 +32,5 @@ RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql17
 
 RUN apt-get install -y odbc-postgresql
 
-#RUN curl https://dev.mysql.com/get/Downloads/Connector-ODBC/8.0/mysql-connector-odbc_8.0.22-1ubuntu18.04_amd64.deb
-#RUN dpkg -i mysql-apt-config_*.deb
-#RUN apt-get update
-#RUN apt-get install -y mysql-connector-odbc
-
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "org.ohdsi.cdm.presentation.builderwebapi.dll"]
