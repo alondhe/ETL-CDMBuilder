@@ -44,7 +44,7 @@ GO
 CREATE TABLE {sc}.cohort
 (
    cohort_definition_id  bigint(20)   NOT NULL,
-   subject_id            int(11)   NOT NULL,
+   subject_id            bigint(20)   NOT NULL,
    cohort_start_date     date      NOT NULL,
    cohort_end_date       date      NOT NULL
 )ENGINE=InnoDB;
@@ -53,7 +53,7 @@ GO
 CREATE TABLE {sc}.cohort_attribute
 (
    cohort_definition_id     bigint(20)   NOT NULL,
-   subject_id               int(11)   NOT NULL,
+   subject_id               bigint(20)  NOT NULL,
    cohort_start_date        date      NOT NULL,
    cohort_end_date          date      NOT NULL,
    attribute_definition_id  int(11)   NOT NULL,

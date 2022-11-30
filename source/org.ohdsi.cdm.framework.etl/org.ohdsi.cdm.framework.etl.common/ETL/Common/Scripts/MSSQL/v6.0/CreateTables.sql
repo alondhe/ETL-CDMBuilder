@@ -488,7 +488,7 @@ CREATE TABLE {sc}.cdm_source
 
 create table {sc}.cohort (
 			cohort_definition_id bigint not null,
-			subject_id integer not null,
+			subject_id bigint not null,
 			cohort_start_date date not null,
 			cohort_end_date date not null );
 

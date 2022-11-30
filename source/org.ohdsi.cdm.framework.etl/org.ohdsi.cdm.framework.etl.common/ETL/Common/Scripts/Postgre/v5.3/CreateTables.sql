@@ -40,7 +40,7 @@ CREATE TABLE {sc}.cdm_source
 CREATE TABLE {sc}.cohort
 (
    cohort_definition_id  bigint   NOT NULL,
-   subject_id            integer   NOT NULL,
+   subject_id            bigint   NOT NULL,
    cohort_start_date     date      NOT NULL,
    cohort_end_date       date      NOT NULL
 );
@@ -48,7 +48,7 @@ CREATE TABLE {sc}.cohort
 CREATE TABLE {sc}.cohort_attribute
 (
    cohort_definition_id     bigint   NOT NULL,
-   subject_id               integer   NOT NULL,
+   subject_id               bigint   NOT NULL,
    cohort_start_date        date      NOT NULL,
    cohort_end_date          date      NOT NULL,
    attribute_definition_id  integer   NOT NULL,

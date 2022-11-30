@@ -450,7 +450,7 @@ CREATE TABLE {sc}.CDM_SOURCE (
 --HINT DISTRIBUTE ON RANDOM
 CREATE TABLE {sc}.COHORT (
 			cohort_definition_id bigint NOT NULL,
-			subject_id integer NOT NULL,
+			subject_id bigint NOT NULL,
 			cohort_start_date date NOT NULL,
 			cohort_end_date date NOT NULL );
 
