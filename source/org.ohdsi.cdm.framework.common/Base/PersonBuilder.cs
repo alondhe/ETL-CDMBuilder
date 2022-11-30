@@ -25,6 +25,7 @@ namespace org.ohdsi.cdm.framework.common.Base
         protected List<Person> PersonRecords = new List<Person>();
         protected List<Death> DeathRecords = new List<Death>();
         protected List<Cohort> CohortRecords = new List<Cohort>();
+        protected List<CohortDefinition> CohortDefinitionRaw = new List<CohortDefinition>();
 
         protected List<PayerPlanPeriod>
             PayerPlanPeriodsRaw = new List<PayerPlanPeriod>();
@@ -54,6 +55,9 @@ namespace org.ohdsi.cdm.framework.common.Base
         protected List<ConditionOccurrence> ConditionForEra = new List<ConditionOccurrence>();
 
         protected List<Note> NoteRecords = new List<Note>();
+        protected List<FactRelationship> FactRelationshipRaw = new List<FactRelationship>();
+        protected List<Specimen> SpecimenRaw = new List<Specimen>();
+        protected List<Episode> EpisodeRaw = new List<Episode>();
 
         private BuildSettings _settings;
 
@@ -190,6 +194,9 @@ namespace org.ohdsi.cdm.framework.common.Base
             CohortRecords.Clear();
             CohortRecords = null;
 
+            CohortDefinitionRaw.Clear();
+            CohortDefinitionRaw = null;
+
             PayerPlanPeriodsRaw.Clear();
             PayerPlanPeriodsRaw = null;
 
@@ -231,6 +238,15 @@ namespace org.ohdsi.cdm.framework.common.Base
 
             NoteRecords.Clear();
             NoteRecords = null;
+
+            FactRelationshipRaw.Clear();
+            FactRelationshipRaw = null;
+
+            SpecimenRaw.Clear();
+            SpecimenRaw = null;
+
+            EpisodeRaw.Clear();
+            EpisodeRaw = null;
         }
 
         private bool AddCost(long eventId, Func<ICostV5, Cost> createCost, IEntity entity, ICostV5 entityCost)
@@ -384,6 +400,12 @@ namespace org.ohdsi.cdm.framework.common.Base
                         break;
                     }
 
+                case EntityType.CohortDefinition:
+                    {
+                        AddEntity((CohortDefinition)data, CohortDefinitionRaw);
+                        break;
+                    }
+
                 case EntityType.Measurement:
                     {
                         AddEntity((Measurement)data, MeasurementsRaw);
@@ -399,6 +421,24 @@ namespace org.ohdsi.cdm.framework.common.Base
                 case EntityType.Note:
                     {
                         //AddEntity((Note)data, NoteRecords); TMP: NOTE 
+                        break;
+                    }
+
+                case EntityType.FactRelationship:
+                    {
+                        AddEntity((FactRelationship)data, FactRelationshipRaw);
+                        break;
+                    }
+
+                case EntityType.Specimen:
+                    {
+                        AddEntity((Specimen)data, SpecimenRaw);
+                        break;
+                    }
+
+                case EntityType.Episode:
+                    {
+                        AddEntity((Episode)data, EpisodeRaw);
                         break;
                     }
             }
@@ -1315,6 +1355,38 @@ namespace org.ohdsi.cdm.framework.common.Base
             AddToChunk(person, death, observationPeriods, payerPlanPeriods, drugExposures,
                 conditionOccurrences, procedureOccurrences, observations, measurements,
                 visitOccurrences.Values.ToArray(), visitDetails, cohort, deviceExposure, notes);
+
+            if(CohortDefinitionRaw != null && CohortDefinitionRaw.Any())
+            {
+                foreach (var c in CohortDefinitionRaw)
+                {
+                    ChunkData.AddData(c);
+                }
+            }
+
+            if (FactRelationshipRaw != null && FactRelationshipRaw.Any())
+            {
+                foreach (var c in FactRelationshipRaw)
+                {
+                    ChunkData.AddData(c);
+                }
+            }
+
+            if (SpecimenRaw != null && SpecimenRaw.Any())
+            {
+                foreach (var c in SpecimenRaw)
+                {
+                    ChunkData.AddData(c);
+                }
+            }
+
+            if (EpisodeRaw != null && EpisodeRaw.Any())
+            {
+                foreach (var c in EpisodeRaw)
+                {
+                    ChunkData.AddData(c);
+                }
+            }
 
             Complete = true;
 

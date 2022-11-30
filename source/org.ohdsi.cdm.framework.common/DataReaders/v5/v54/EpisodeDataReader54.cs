@@ -1,28 +1,31 @@
-﻿using org.ohdsi.cdm.framework.common.Omop;
+﻿using org.ohdsi.cdm.framework.common.Builder;
+using org.ohdsi.cdm.framework.common.Omop;
 using System;
 using System.Collections.Generic;
 using System.Data;
 
-namespace org.ohdsi.cdm.framework.common.DataReaders.v6
+namespace org.ohdsi.cdm.framework.common.DataReaders.v5.v54
 {
-    public class CohortDefinitionDataReader : IDataReader
+    public class EpisodeDataReader54 : IDataReader
     {
-        private readonly IEnumerator<CohortDefinition> _cohortEnumerator;
+        private readonly IEnumerator<Episode> _enumerator;
+        private readonly KeyMasterOffsetManager _offset;
 
         // A custom DataReader is implemented to prevent the need for the HashSet to be transformed to a DataTable for loading by SqlBulkCopy
-        public CohortDefinitionDataReader(List<CohortDefinition> batch)
+        public EpisodeDataReader54(List<Episode> batch, KeyMasterOffsetManager o)
         {
-            _cohortEnumerator = batch?.GetEnumerator();
+            _enumerator = batch?.GetEnumerator();
+            _offset = o;
         }
 
         public bool Read()
         {
-            return _cohortEnumerator.MoveNext();
+            return _enumerator.MoveNext();
         }
 
         public int FieldCount
         {
-            get { return 7; }
+            get { return 13; }
         }
 
         // is this called only because the datatype specific methods are not implemented?  
@@ -32,20 +35,31 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
             switch (i)
             {
                 case 0:
-                    return _cohortEnumerator.Current.Id;
+                    return _offset.GetId(_enumerator.Current.PersonId, _enumerator.Current.Id);
                 case 1:
-                    return _cohortEnumerator.Current.Name;
+                    return _enumerator.Current.PersonId;
                 case 2:
-                    return _cohortEnumerator.Current.Description;
+                    return _enumerator.Current.ConceptId;
                 case 3:
-                    return _cohortEnumerator.Current.TypeConceptId;
+                    return _enumerator.Current.StartDate;
                 case 4:
-                    return _cohortEnumerator.Current.Syntax;
+                    return _enumerator.Current.StartDate;
                 case 5:
-                    return _cohortEnumerator.Current.ConceptId;
+                    return _enumerator.Current.EndDate;
                 case 6:
-                    return _cohortEnumerator.Current.StartDate;
-
+                    return _enumerator.Current.EndDate;
+                case 7:
+                    return _enumerator.Current.EpisodeParentId;
+                case 8:
+                    return _enumerator.Current.EpisodeNumber;
+                case 9:
+                    return _enumerator.Current.EpisodeObjectConceptId;
+                case 10:
+                    return _enumerator.Current.TypeConceptId;
+                case 11:
+                    return _enumerator.Current.SourceValue;
+                case 12:
+                    return _enumerator.Current.SourceConceptId;
                 default:
                     throw new NotImplementedException();
             }
@@ -55,20 +69,26 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
         {
             switch (i)
             {
-                case 0: return "cohort_definition_id";
-                case 1: return "cohort_definition_name";
-                case 2: return "cohort_definition_description";
-                case 3: return "definition_type_concept_id";
-                case 4: return "cohort_definition_syntax";
-                case 5: return "subject_concept_id";
-                case 6: return "cohort_initiation_date";
-
+                case 0: return "episode_id";
+                case 1: return "person_id";
+                case 2: return "episode_concept_id";
+                case 3: return "episode_start_date";
+                case 4: return "episode_start_datetime";
+                case 5: return "episode_end_date";
+                case 6: return "episode_end_datetime";
+                case 7: return "episode_parent_id";
+                case 8: return "episode_number";
+                case 9: return "episode_object_concept_id";
+                case 10: return "episode_type_concept_id";
+                case 11: return "episode_source_value";
+                case 12: return "episode_source_concept_id";
                 default:
                     throw new NotImplementedException();
             }
         }
 
         #region implementationn not required for SqlBulkCopy
+
         public bool NextResult()
         {
             throw new NotImplementedException();
@@ -161,18 +181,29 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
                 case 0:
                     return typeof(long);
                 case 1:
-                    return typeof(string);
+                    return typeof(long);
                 case 2:
-                    return typeof(string);
+                    return typeof(long);
                 case 3:
-                    return typeof(int);
+                    return typeof(DateTime);
                 case 4:
-                    return typeof(string);
+                    return typeof(DateTime);
                 case 5:
-                    return typeof(int);
+                    return typeof(DateTime);
                 case 6:
                     return typeof(DateTime);
-
+                case 7:
+                    return typeof(long);
+                case 8:
+                    return typeof(int);
+                case 9:
+                    return typeof(long);
+                case 10:
+                    return typeof(long);
+                case 11:
+                    return typeof(string);
+                case 12:
+                    return typeof(long);
                 default:
                     throw new NotImplementedException();
             }
@@ -239,6 +270,7 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
         {
             get { throw new NotImplementedException(); }
         }
+
         #endregion
     }
 }

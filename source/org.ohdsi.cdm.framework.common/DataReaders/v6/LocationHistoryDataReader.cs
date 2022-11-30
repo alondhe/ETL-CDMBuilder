@@ -5,19 +5,19 @@ using System.Data;
 
 namespace org.ohdsi.cdm.framework.common.DataReaders.v6
 {
-    public class CohortDefinitionDataReader : IDataReader
+    public class LocationHistoryDataReader : IDataReader
     {
-        private readonly IEnumerator<CohortDefinition> _cohortEnumerator;
+        private readonly IEnumerator<LocationHistory> _enumerator;
 
         // A custom DataReader is implemented to prevent the need for the HashSet to be transformed to a DataTable for loading by SqlBulkCopy
-        public CohortDefinitionDataReader(List<CohortDefinition> batch)
+        public LocationHistoryDataReader(List<LocationHistory> batch)
         {
-            _cohortEnumerator = batch?.GetEnumerator();
+            _enumerator = batch?.GetEnumerator();
         }
 
         public bool Read()
         {
-            return _cohortEnumerator.MoveNext();
+            return _enumerator.MoveNext();
         }
 
         public int FieldCount
@@ -25,26 +25,32 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
             get { return 7; }
         }
 
-        // is this called only because the datatype specific methods are not implemented?  
-        // probably performance to be gained by not passing object back?
         public object GetValue(int i)
         {
+            if (_enumerator.Current == null) return null;
+
             switch (i)
             {
                 case 0:
-                    return _cohortEnumerator.Current.Id;
+                    return _enumerator.Current.Id;
+
                 case 1:
-                    return _cohortEnumerator.Current.Name;
+                    return _enumerator.Current.LocationId;
+
                 case 2:
-                    return _cohortEnumerator.Current.Description;
+                    return _enumerator.Current.TypeConceptId;
+
                 case 3:
-                    return _cohortEnumerator.Current.TypeConceptId;
+                    return _enumerator.Current.DomainId;
+
                 case 4:
-                    return _cohortEnumerator.Current.Syntax;
+                    return _enumerator.Current.EntityId;
+
                 case 5:
-                    return _cohortEnumerator.Current.ConceptId;
+                    return _enumerator.Current.StartDate;
+
                 case 6:
-                    return _cohortEnumerator.Current.StartDate;
+                    return _enumerator.Current.EndDate;
 
                 default:
                     throw new NotImplementedException();
@@ -55,13 +61,13 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
         {
             switch (i)
             {
-                case 0: return "cohort_definition_id";
-                case 1: return "cohort_definition_name";
-                case 2: return "cohort_definition_description";
-                case 3: return "definition_type_concept_id";
-                case 4: return "cohort_definition_syntax";
-                case 5: return "subject_concept_id";
-                case 6: return "cohort_initiation_date";
+                case 0: return "location_history_id";
+                case 1: return "location_id";
+                case 2: return "relationship_type_concept_id";
+                case 3: return "domain_id";
+                case 4: return "entity_id";
+                case 5: return "start_date";
+                case 6: return "end_date";
 
                 default:
                     throw new NotImplementedException();
@@ -158,20 +164,13 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
         {
             switch (i)
             {
-                case 0:
-                    return typeof(long);
-                case 1:
-                    return typeof(string);
-                case 2:
-                    return typeof(string);
-                case 3:
-                    return typeof(int);
-                case 4:
-                    return typeof(string);
-                case 5:
-                    return typeof(int);
-                case 6:
-                    return typeof(DateTime);
+                case 0: return typeof(long);
+                case 1: return typeof(long);
+                case 2: return typeof(long);
+                case 3: return typeof(string);
+                case 4: return typeof(long);
+                case 5: return typeof(DateTime);
+                case 6: return typeof(DateTime);
 
                 default:
                     throw new NotImplementedException();

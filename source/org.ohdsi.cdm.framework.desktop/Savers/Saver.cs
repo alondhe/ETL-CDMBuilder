@@ -270,6 +270,24 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                         yield return null;
                         break;
 
+                    case "SPECIMEN":
+                        foreach (var list in SplitList(chunk.Specimen))
+                        {
+                            yield return new SpecimenDataReader(list, _offsetManager);
+                        }
+                        break;
+
+                    case "SURVEY_CONDUCT":
+                        foreach (var list in SplitList(chunk.SurveyConduct))
+                        {
+                            yield return new cdm6.SurveyConductDataReader(list, _offsetManager);
+                        }
+                        break;
+
+                    case "EPISODE":
+                        yield return null;
+                        break;
+
                     default:
                         throw new Exception("CreateDataReader, unsupported table name: " + table);
                 }
@@ -437,6 +455,14 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                         }
                         break;
 
+                    case "COHORT_DEFINITION":
+                        foreach (var list in SplitList(chunk.CohortDefinition))
+                        {
+                            yield return new org.ohdsi.cdm.framework.common.DataReaders.v6.CohortDefinitionDataReader(list);
+
+                        }
+                        break;
+
                     case "CONDITION_OCCURRENCE":
                         {
                             foreach (var list in SplitList(chunk.ConditionOccurrences))
@@ -478,6 +504,26 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                             }
                             break;
                         }
+
+                    case "SPECIMEN":
+                        foreach (var list in SplitList(chunk.Specimen))
+                        {
+                            yield return new SpecimenDataReader(list, _offsetManager);
+                        }
+                        break;
+
+                    case "EPISODE":
+                        {
+                            foreach (var list in SplitList(chunk.Episode))
+                            {
+                                if (CdmVersion == CdmVersions.V54)
+                                    yield return new EpisodeDataReader54(list, _offsetManager);
+                                else
+                                    yield return null;
+                            }
+                            break;
+                        }
+
                     default:
                         throw new Exception("CreateDataReader, unsupported table name: " + table);
                 }
@@ -517,6 +563,7 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                 Write(chunk, "DEVICE_EXPOSURE");
                 Write(chunk, "MEASUREMENT");
                 Write(chunk, "COHORT");
+                Write(chunk, "COHORT_DEFINITION");
 
                 Write(chunk, "CONDITION_OCCURRENCE");
 
@@ -530,6 +577,14 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                 }
 
                 Write(chunk, "FACT_RELATIONSHIP");
+                Write(chunk, "SPECIMEN");
+                Write(chunk, "EPISODE");
+
+                if (CdmVersion == CdmVersions.V6)
+                {
+                    Write(chunk, "SURVEY_CONDUCT");
+                }
+                
 
                 //Task.WaitAll(tasks.ToArray());
 
@@ -544,7 +599,15 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
             }
         }
 
-        public virtual void SaveEntityLookup(CdmVersions cdmVersions, List<Location> location, List<CareSite> careSite, List<Provider> provider, List<CohortDefinition> cohortDefinition)
+        public virtual void SaveEntityLookup(CdmVersions cdmVersions, 
+            List<Location> location, 
+            List<CareSite> careSite, 
+            List<Provider> provider, 
+            List<CohortDefinition> cohortDefinition,
+            List<CdmSource> cdmSource,
+            List<MetadataOMOP> metadata,
+            List<LocationHistory> locationHistory,
+            List<Cohort> cohort)
         {
             try
             {
@@ -558,6 +621,9 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
 
                     if (provider != null && provider.Count > 0)
                         Write(null, null, new cdm6.ProviderDataReader(provider), "PROVIDER");
+
+                    if (locationHistory != null && locationHistory.Count > 0)
+                        Write(null, null, new cdm6.LocationHistoryDataReader(locationHistory), "LOCATION_HISTORY");
                 }
                 else
                 {
@@ -584,6 +650,29 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                 if (cohortDefinition != null && cohortDefinition.Count > 0)
                 {
                     Write(null, null, new cdm6.CohortDefinitionDataReader(cohortDefinition), "COHORT_DEFINITION");
+                }
+
+                if (cohort != null && cohort.Count > 0)
+                {
+                    Write(null, null, new cdm6.CohortDataReader(cohort), "COHORT");
+                }
+
+                if (cdmSource != null && cdmSource.Count > 0)
+                {
+                    if (cdmVersions == CdmVersions.V54)
+                        Write(null, null, new CdmSourceDataReader54(cdmSource[0]), "CDM_SOURCE");
+                    else
+                        Write(null, null, new CdmSourceDataReader(cdmSource[0]), "CDM_SOURCE");
+                }
+
+                if (metadata != null && metadata.Count > 0)
+                {
+                    if (cdmVersions == CdmVersions.V53)
+                        Write(null, null, new MetadataOMOPDataReader53(metadata), "METADATA");
+                    else if (cdmVersions == CdmVersions.V54)
+                        Write(null, null, new MetadataOMOPDataReader54(metadata), "METADATA");
+                    else
+                        Write(null, null, new cdm6.MetadataOMOPDataReader6(metadata), "METADATA");
                 }
 
                 Commit();

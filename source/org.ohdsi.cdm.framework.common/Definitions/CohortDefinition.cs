@@ -8,43 +8,26 @@ namespace org.ohdsi.cdm.framework.common.Definitions
 {
     public class CohortDefinition : EntityDefinition
     {
-        public string StopReason { get; set; }
+        public string SubjectId { get; set; }
+        public string CohortStartDate { get; set; }
+        public string CohortEndDate { get; set; }
 
         public override IEnumerable<IEntity> GetConcepts(Concept concept, IDataRecord reader, KeyMasterOffsetManager offset)
         {
-            var personId = reader.GetLong(PersonId);
-            var startDate = reader.GetDateTime(StartDate);
-            var endDate = reader.GetDateTime(EndDate);
-
-            Entity e;
-            if (concept != null && concept.Fields != null && concept.Fields.Length > 0)
+            var subjectId = reader.GetLong(SubjectId);
+            var startDate = reader.GetDateTime(CohortStartDate);
+            var endDate = reader.GetDateTime(CohortEndDate);
+      
+            var cohort = new Cohort(new Entity())
             {
-                e = new Entity
-                {
-                    IsUnique = false,
-                    PersonId = personId.Value,
-                    SourceValue = " ",
-                    ConceptId = concept.Fields[0].DefaultConceptId.Value,
-                    TypeConceptId = concept.Fields[0].DefaultTypeId.Value,
-                    StartDate = startDate,
-                    EndDate = endDate
-                };
-            }
-            else
-            {
-                e = new Entity
-                {
-                    IsUnique = false,
-                    PersonId = personId.Value,
-                    StartDate = startDate,
-                    EndDate = endDate
-                };
-            }
-
-            yield return new Cohort(e)
-            {
-                Id = reader.GetLong(Id).Value
+                PersonId = subjectId.Value,
+                StartDate = startDate,
+                EndDate = endDate
             };
+
+            cohort.Id = string.IsNullOrEmpty(Id) ? Entity.GetId(cohort.GetKey()) : reader.GetLong(Id).Value;
+
+            yield return cohort;
         }
     }
 }

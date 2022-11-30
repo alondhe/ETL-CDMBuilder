@@ -166,19 +166,48 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             var locationConcepts = new List<Location>();
             var careSiteConcepts = new List<CareSite>();
             var providerConcepts = new List<Provider>();
+            var cdmSourceConcepts = new List<CdmSource>();
+            var metadataConcepts = new List<MetadataOMOP>();
+            var locationHistory = new List<LocationHistory>();
+            var cohortConcepts = new List<Cohort>();
+            var cohortDefinitionConcepts = new List<framework.common.Omop.CohortDefinition>();
 
             LoadLocation(locationConcepts);
             LoadCareSite(careSiteConcepts);
             LoadProvider(providerConcepts);
-            SaveLookup(timer, locationConcepts, careSiteConcepts, providerConcepts);
+            LoadCdmSource(cdmSourceConcepts);
+            LoadMetadata(metadataConcepts);
+            LoadLocationHistory(locationHistory);
+            LoadCohort(cohortConcepts);
+            LoadCohortDefinition(cohortDefinitionConcepts);
+
+            SaveLookup(timer, 
+                locationConcepts, 
+                careSiteConcepts, 
+                providerConcepts, 
+                cdmSourceConcepts,
+                metadataConcepts,
+                locationHistory,
+                cohortConcepts,
+                cohortDefinitionConcepts);
 
             locationConcepts.Clear();
             careSiteConcepts.Clear();
             providerConcepts.Clear();
+            cdmSourceConcepts.Clear();
+            metadataConcepts.Clear();
+            locationHistory.Clear();
+            cohortConcepts.Clear();
+            cohortDefinitionConcepts.Clear();
             locationConcepts = null;
             careSiteConcepts = null;
             providerConcepts = null;
+            cdmSourceConcepts = null;
             vocabulary = null;
+            metadataConcepts = null;
+            locationHistory = null;
+            cohortConcepts = null;
+            cohortDefinitionConcepts = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
             DBBuilder.CompleteStep(_connectionString, _conversionId, Steps.ConvertHealthSystemData);
@@ -191,7 +220,15 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             vocabulary.StoreToFileManager(_userName, _fileManagerUrl, _secureKey);
         }
 
-        private void SaveLookup(Stopwatch timer, List<Location> locationConcepts, List<CareSite> careSiteConcepts, List<Provider> providerConcepts)
+        private void SaveLookup(Stopwatch timer, 
+            List<Location> locationConcepts, 
+            List<CareSite> careSiteConcepts, 
+            List<Provider> providerConcepts, 
+            List<CdmSource> cdmSource,
+            List<MetadataOMOP> metadata,
+            List<LocationHistory> locationHistory,
+            List<Cohort> cohortConcepts,
+            List<framework.common.Omop.CohortDefinition> cohortDefinitionConcepts)
         {
             if (DBBuilder.IsConversionAborted(_connectionString, _conversionId)) 
                 return;
@@ -205,67 +242,78 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                 _settings.ConversionSettings.SourceSchema,
                 _settings.ConversionSettings.DestinationSchema))
             {
-                saver.SaveEntityLookup(_settings.Cdm, locationConcepts, careSiteConcepts, providerConcepts, null);
+                saver.SaveEntityLookup(_settings.Cdm, 
+                    locationConcepts, 
+                    careSiteConcepts, 
+                    providerConcepts,
+                    cohortDefinitionConcepts,
+                    cdmSource,
+                    metadata,
+                    locationHistory,
+                    cohortConcepts);
             }
 
-            using (saver.Create(_settings.DestinationConnectionString,
-                _settings.Cdm,
-                _settings.ConversionSettings.SourceSchema,
-                _settings.ConversionSettings.DestinationSchema))
+            if (cdmSource.Count == 0)
             {
-                if (_settings.Cdm == framework.common.Enums.CdmVersions.V53)
+                using (saver.Create(_settings.DestinationConnectionString,
+                    _settings.Cdm,
+                    _settings.ConversionSettings.SourceSchema,
+                    _settings.ConversionSettings.DestinationSchema))
                 {
-                    var reader = new CdmSourceDataReader(new CdmSource
+                    if (_settings.Cdm == framework.common.Enums.CdmVersions.V53)
                     {
-                        CdmSourceName = _settings.ConversionSettings.SourceDatabase,
-                        CdmSourceAbbreviation = _settings.ConversionSettings.SourceDatabase,
-                        SourceDescription = _settings.ConversionSettings.SourceDatabase,
-                        CdmEtlReference = "unknown",
-                        SourceDocumentationReference = "None",
-                        CdmReleaseDate = DateTime.Now,
-                        SourceReleaseDate = DateTime.Now,
-                        CdmVersion = _settings.GetCdmScriptsFolder,
-                        VocabularyVersion = "5.3",
-                        CdmHolder = "unknown"
-                    });
-                    saver.Write(null, null, reader, "CDM_SOURCE");
-                    saver.Commit();
-                }
-                else if (_settings.Cdm == framework.common.Enums.CdmVersions.V54)
-                {
-                    var reader = new CdmSourceDataReader54(new CdmSource
+                        var reader = new CdmSourceDataReader(new CdmSource
+                        {
+                            CdmSourceName = _settings.ConversionSettings.SourceDatabase,
+                            CdmSourceAbbreviation = _settings.ConversionSettings.SourceDatabase,
+                            SourceDescription = _settings.ConversionSettings.SourceDatabase,
+                            CdmEtlReference = "unknown",
+                            SourceDocumentationReference = "None",
+                            CdmReleaseDate = DateTime.Now,
+                            SourceReleaseDate = DateTime.Now,
+                            CdmVersion = _settings.GetCdmScriptsFolder,
+                            VocabularyVersion = "5.3",
+                            CdmHolder = "unknown"
+                        });
+                        saver.Write(null, null, reader, "CDM_SOURCE");
+                        saver.Commit();
+                    }
+                    else if (_settings.Cdm == framework.common.Enums.CdmVersions.V54)
                     {
-                        CdmSourceName = _settings.ConversionSettings.SourceDatabase,
-                        CdmSourceAbbreviation = _settings.ConversionSettings.SourceDatabase,
-                        SourceDescription = _settings.ConversionSettings.SourceDatabase,
-                        CdmEtlReference = "unknown",
-                        SourceDocumentationReference = "None",
-                        CdmReleaseDate = DateTime.Now,
-                        SourceReleaseDate = DateTime.Now,
-                        CdmVersion = _settings.GetCdmScriptsFolder,
-                        VocabularyVersion = "5.4",
-                        CdmHolder = "unknown"
-                    });
-                    saver.Write(null, null, reader, "CDM_SOURCE");
-                    saver.Commit();
-                }
-                else
-                {
-                    var reader = new CdmSourceDataReader(new CdmSource
+                        var reader = new CdmSourceDataReader54(new CdmSource
+                        {
+                            CdmSourceName = _settings.ConversionSettings.SourceDatabase,
+                            CdmSourceAbbreviation = _settings.ConversionSettings.SourceDatabase,
+                            SourceDescription = _settings.ConversionSettings.SourceDatabase,
+                            CdmEtlReference = "unknown",
+                            SourceDocumentationReference = "None",
+                            CdmReleaseDate = DateTime.Now,
+                            SourceReleaseDate = DateTime.Now,
+                            CdmVersion = _settings.GetCdmScriptsFolder,
+                            VocabularyVersion = "5.4",
+                            CdmHolder = "unknown"
+                        });
+                        saver.Write(null, null, reader, "CDM_SOURCE");
+                        saver.Commit();
+                    }
+                    else
                     {
-                        CdmSourceName = _settings.ConversionSettings.SourceDatabase,
-                        CdmSourceAbbreviation = _settings.ConversionSettings.SourceDatabase,
-                        SourceDescription = _settings.ConversionSettings.SourceDatabase,
-                        CdmEtlReference = "unknown",
-                        SourceDocumentationReference = "None",
-                        CdmReleaseDate = DateTime.Now,
-                        SourceReleaseDate = DateTime.Now,
-                        CdmVersion = _settings.GetCdmScriptsFolder,
-                        VocabularyVersion = "6.0",
-                        CdmHolder = "unknown"
-                    });
-                    saver.Write(null, null, reader, "CDM_SOURCE");
-                    saver.Commit();
+                        var reader = new CdmSourceDataReader(new CdmSource
+                        {
+                            CdmSourceName = _settings.ConversionSettings.SourceDatabase,
+                            CdmSourceAbbreviation = _settings.ConversionSettings.SourceDatabase,
+                            SourceDescription = _settings.ConversionSettings.SourceDatabase,
+                            CdmEtlReference = "unknown",
+                            SourceDocumentationReference = "None",
+                            CdmReleaseDate = DateTime.Now,
+                            SourceReleaseDate = DateTime.Now,
+                            CdmVersion = _settings.GetCdmScriptsFolder,
+                            VocabularyVersion = "6.0",
+                            CdmHolder = "unknown"
+                        });
+                        saver.Write(null, null, reader, "CDM_SOURCE");
+                        saver.Commit();
+                    }
                 }
             }
 
@@ -290,6 +338,86 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             }
             Console.WriteLine("Providers was loaded");
             WriteLog(LogType.Info, "Providers was loaded", 0);
+        }
+
+        private void LoadCdmSource(List<CdmSource> cdmSourceConcepts)
+        {
+            if (DBBuilder.IsConversionAborted(_connectionString, _conversionId))
+                return;
+
+            Console.WriteLine("Loading cdmSource...");
+            WriteLog(LogType.Info, "Loading cdmSource...", 0);
+            var cdmSource = _settings.SourceQueryDefinitions.FirstOrDefault(qd => qd.CdmSource != null);
+            if (cdmSource != null)
+            {
+                FillList<CdmSource>(cdmSourceConcepts, cdmSource, cdmSource.CdmSource[0]);
+            }
+            Console.WriteLine("CdmSource was loaded");
+            WriteLog(LogType.Info, "CdmSource was loaded", 0);
+        }
+
+        private void LoadMetadata(List<MetadataOMOP> metadataConcepts)
+        {
+            if (DBBuilder.IsConversionAborted(_connectionString, _conversionId))
+                return;
+
+            Console.WriteLine("Loading Metadata...");
+            WriteLog(LogType.Info, "Loading Metadata...", 0);
+            var metadata = _settings.SourceQueryDefinitions.FirstOrDefault(qd => qd.Metadata != null);
+            if (metadata != null)
+            {
+                FillList<MetadataOMOP>(metadataConcepts, metadata, metadata.Metadata[0]);
+            }
+            Console.WriteLine("Metadata was loaded");
+            WriteLog(LogType.Info, "Metadata was loaded", 0);
+        }
+
+        private void LoadLocationHistory(List<LocationHistory> locationHistoryConcepts)
+        {
+            if (DBBuilder.IsConversionAborted(_connectionString, _conversionId))
+                return;
+
+            Console.WriteLine("Loading LocationHistory...");
+            WriteLog(LogType.Info, "Loading LocationHistory...", 0);
+            var locationHistory = _settings.SourceQueryDefinitions.FirstOrDefault(qd => qd.LocationHistory != null);
+            if (locationHistory != null)
+            {
+                FillList<LocationHistory>(locationHistoryConcepts, locationHistory, locationHistory.LocationHistory[0]);
+            }
+            Console.WriteLine("LocationHistory was loaded");
+            WriteLog(LogType.Info, "LocationHistory was loaded", 0);
+        }
+
+        private void LoadCohort(List<Cohort> cohortConcepts)
+        {
+            if (DBBuilder.IsConversionAborted(_connectionString, _conversionId))
+                return;
+
+            Console.WriteLine("Loading Cohort...");
+            WriteLog(LogType.Info, "Loading Cohort...", 0);
+            var cohort = _settings.SourceQueryDefinitions.FirstOrDefault(qd => qd.Cohort != null);
+            if (cohort != null)
+            {
+                FillList<Cohort>(cohortConcepts, cohort, cohort.Cohort[0]);
+            }
+            Console.WriteLine("Cohort was loaded");
+            WriteLog(LogType.Info, "Cohort was loaded", 0);
+        }
+
+        private void LoadCohortDefinition(List<framework.common.Omop.CohortDefinition> cohortDefinitionConcepts)
+        {
+            if (DBBuilder.IsConversionAborted(_connectionString, _conversionId))
+                return;
+
+            Console.WriteLine("Loading CohortDefinition...");
+            WriteLog(LogType.Info, "Loading CohortDefinition...", 0);
+            var cohortDefinition = _settings.SourceQueryDefinitions.FirstOrDefault(qd => qd.CohortDefinition != null);
+            if (cohortDefinition != null)
+            {
+                FillList<framework.common.Omop.CohortDefinition>(cohortDefinitionConcepts, cohortDefinition, cohortDefinition.CohortDefinition[0]);
+            }
+            Console.WriteLine("CohortDefinition was loaded");
+            WriteLog(LogType.Info, "CohortDefinition was loaded", 0);
         }
 
         private void LoadCareSite(List<CareSite> careSiteConcepts)
@@ -336,7 +464,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             var sql = GetSqlHelper.GetSql(_settings.SourceEngine.Database,
                 qd.GetSql("", _settings.ConversionSettings.SourceSchema), _settings.ConversionSettings.SourceSchema);
 
-            if (string.IsNullOrEmpty(sql)) return;
+            sql = sql.Replace("{0}", "0"); // TODO: remove chunk join from CdmSource, Metadata, LocationHistory
+            if (string.IsNullOrEmpty(sql)) 
+                return;
 
             var keys = new Dictionary<string, bool>();
             using var connection = _settings.SourceEngine.GetConnection(_settings.SourceConnectionString);

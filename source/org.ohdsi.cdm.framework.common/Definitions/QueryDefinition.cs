@@ -82,17 +82,26 @@ namespace org.ohdsi.cdm.framework.common.Definitions
         public VisitDetailDefinition[] VisitDetail { get; set; }
         public VisitCostDefinition[] VisitCost { get; set; }
         public CohortDefinition[] Cohort { get; set; }
+        public CohortDefinitionDefinition[] CohortDefinition { get; set; }
         public DeviceExposureDefinition[] DeviceExposure { get; set; }
         public DeviceCostDefinition[] DeviceCost { get; set; }
 
         public LocationDefinition[] Locations { get; set; }
+        public LocationHistoryDefinition[] LocationHistory { get; set; }
         public OrganizationDefinition[] Organizations { get; set; }
         public CareSiteDefinition[] CareSites { get; set; }
         public ProviderDefinition[] Providers { get; set; }
+        public CdmSourceDefinition[] CdmSource { get; set; }
+        public MetadataDefinition[] Metadata { get; set; }
 
 
         public EpisodeDefinition[] Episode { get; set; }
         public EpisodeEventDefinition[] EpisodeEvent { get; set; }
+
+        public FactRelationshipDefinition[] FactRelationship { get; set; }
+        public SpecimenDefinition[] Specimen { get; set; }
+
+        public SurveyConductDefinition[] SurveyConduct { get; set; }
 
         public void RowProcessed()
         {
@@ -180,11 +189,6 @@ namespace org.ohdsi.cdm.framework.common.Definitions
                 return VisitDetail[0].PersonId;
             }
 
-            if (Cohort != null && Cohort.Any())
-            {
-                return Cohort[0].PersonId;
-            }
-
             if (DeviceExposure != null && DeviceExposure.Any())
             {
                 return DeviceExposure[0].PersonId;
@@ -198,6 +202,21 @@ namespace org.ohdsi.cdm.framework.common.Definitions
             if (Episode != null && Episode.Any())
             {
                 return Episode[0].PersonId;
+            }
+
+            if (FactRelationship != null && FactRelationship.Any())
+            {
+                return FactRelationship[0].PersonId;
+            }
+
+            if (Specimen != null && Specimen.Any())
+            {
+                return Specimen[0].PersonId;
+            }
+
+            if (SurveyConduct != null && SurveyConduct.Any())
+            {
+                return SurveyConduct[0].PersonId;
             }
 
             throw new Exception("Cant find PersonId FieldName " + this.FileName);

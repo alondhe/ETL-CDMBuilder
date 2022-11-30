@@ -22,7 +22,7 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v5.v54
 
         public int FieldCount
         {
-            get { return 6; }
+            get { return 9; }
         }
 
         public object GetValue(int i)
@@ -38,21 +38,24 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v5.v54
                     return _enumerator.Current.MetadataConceptId;
 
                 case 2:
-                    return _enumerator.Current.Name;
+                    return _enumerator.Current.MetadataTypeConceptId;
 
                 case 3:
-                    return _enumerator.Current.ValueAsString;
+                    return _enumerator.Current.Name;
 
                 case 4:
-                    return _enumerator.Current.ValueAsConceptId;
+                    return _enumerator.Current.ValueAsString;
 
                 case 5:
-                    return _enumerator.Current.ValueAsNumber;
+                    return _enumerator.Current.ValueAsConceptId;
 
                 case 6:
-                    return _enumerator.Current.MetadataDate;
+                    return _enumerator.Current.ValueAsNumber;
 
                 case 7:
+                    return _enumerator.Current.MetadataDate;
+
+                case 8:
                     return _enumerator.Current.MetadataDatetime;
 
                 default:
@@ -66,12 +69,13 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v5.v54
             {
                 case 0: return "metadata_id";
                 case 1: return "metadata_concept_id";
-                case 2: return "name";
-                case 3: return "value_as_string";
-                case 4: return "value_as_concept_id";
-                case 5: return "value_as_number";
-                case 6: return "metadata_date";
-                case 7: return "metadata_datetime";
+                case 2: return "metadata_type_concept_id";
+                case 3: return "name";
+                case 4: return "value_as_string";
+                case 5: return "value_as_concept_id";
+                case 6: return "value_as_number";
+                case 7: return "metadata_date";
+                case 8: return "metadata_datetime";
 
                 default:
                     throw new NotImplementedException();
@@ -171,27 +175,30 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v5.v54
             switch (i)
             {
                 case 0:
-                    return typeof(int);
+                    return typeof(long);
 
                 case 1:
                     return typeof(int);
 
                 case 2:
-                    return typeof(string);
+                    return typeof(int);
 
                 case 3:
                     return typeof(string);
 
                 case 4:
-                    return typeof(int);
+                    return typeof(string);
 
                 case 5:
-                    return typeof(decimal);
+                    return typeof(int);
 
                 case 6:
-                    return typeof(DateTime);
+                    return typeof(decimal);
 
                 case 7:
+                    return typeof(DateTime);
+
+                case 8:
                     return typeof(DateTime);
 
                 default:

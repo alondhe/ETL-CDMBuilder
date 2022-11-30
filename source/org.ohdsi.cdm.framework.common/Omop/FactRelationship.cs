@@ -2,7 +2,7 @@
 
 namespace org.ohdsi.cdm.framework.common.Omop
 {
-    public class FactRelationship : IEquatable<FactRelationship>
+    public class FactRelationship : Entity, IEquatable<FactRelationship>
     {
         public long DomainConceptId1 { get; set; }
 

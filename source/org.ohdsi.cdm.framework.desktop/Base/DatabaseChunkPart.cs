@@ -48,6 +48,11 @@ namespace org.ohdsi.cdm.framework.desktop.Base
                     if (qd.Providers != null) continue;
                     if (qd.Locations != null) continue;
                     if (qd.CareSites != null) continue;
+                    if (qd.CdmSource != null) continue;
+                    if (qd.Metadata != null) continue;
+                    if (qd.LocationHistory != null) continue;
+                    if (qd.Cohort != null) continue;
+                    if (qd.CohortDefinition != null) continue;
 
                     fileName = qd.FileName;
 

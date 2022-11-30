@@ -5,46 +5,50 @@ using System.Data;
 
 namespace org.ohdsi.cdm.framework.common.DataReaders.v6
 {
-    public class CohortDefinitionDataReader : IDataReader
+    public class MetadataOMOPDataReader6 : IDataReader
     {
-        private readonly IEnumerator<CohortDefinition> _cohortEnumerator;
+        private readonly IEnumerator<MetadataOMOP> _enumerator;
 
         // A custom DataReader is implemented to prevent the need for the HashSet to be transformed to a DataTable for loading by SqlBulkCopy
-        public CohortDefinitionDataReader(List<CohortDefinition> batch)
+        public MetadataOMOPDataReader6(List<MetadataOMOP> batch)
         {
-            _cohortEnumerator = batch?.GetEnumerator();
+            _enumerator = batch?.GetEnumerator();
         }
 
         public bool Read()
         {
-            return _cohortEnumerator.MoveNext();
+            return _enumerator.MoveNext();
         }
 
         public int FieldCount
         {
-            get { return 7; }
+            get { return 6; }
         }
 
-        // is this called only because the datatype specific methods are not implemented?  
-        // probably performance to be gained by not passing object back?
         public object GetValue(int i)
         {
+            if (_enumerator.Current == null) return null;
+
             switch (i)
             {
+
                 case 0:
-                    return _cohortEnumerator.Current.Id;
+                    return _enumerator.Current.MetadataConceptId;
+
                 case 1:
-                    return _cohortEnumerator.Current.Name;
+                    return _enumerator.Current.Name;
+
                 case 2:
-                    return _cohortEnumerator.Current.Description;
+                    return _enumerator.Current.ValueAsString;
+
                 case 3:
-                    return _cohortEnumerator.Current.TypeConceptId;
+                    return _enumerator.Current.ValueAsConceptId;
+
                 case 4:
-                    return _cohortEnumerator.Current.Syntax;
+                    return _enumerator.Current.MetadataDate;
+
                 case 5:
-                    return _cohortEnumerator.Current.ConceptId;
-                case 6:
-                    return _cohortEnumerator.Current.StartDate;
+                    return _enumerator.Current.MetadataDatetime;
 
                 default:
                     throw new NotImplementedException();
@@ -55,13 +59,12 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
         {
             switch (i)
             {
-                case 0: return "cohort_definition_id";
-                case 1: return "cohort_definition_name";
-                case 2: return "cohort_definition_description";
-                case 3: return "definition_type_concept_id";
-                case 4: return "cohort_definition_syntax";
-                case 5: return "subject_concept_id";
-                case 6: return "cohort_initiation_date";
+                case 0: return "metadata_concept_id";
+                case 1: return "name";
+                case 2: return "value_as_string";
+                case 3: return "value_as_concept_id";
+                case 4: return "metadata_date";
+                case 5: return "metadata_datetime";
 
                 default:
                     throw new NotImplementedException();
@@ -69,6 +72,7 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
         }
 
         #region implementationn not required for SqlBulkCopy
+
         public bool NextResult()
         {
             throw new NotImplementedException();
@@ -156,21 +160,26 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
 
         public Type GetFieldType(int i)
         {
+
             switch (i)
             {
+
                 case 0:
-                    return typeof(long);
+                    return typeof(int);
+
                 case 1:
                     return typeof(string);
+
                 case 2:
                     return typeof(string);
+
                 case 3:
                     return typeof(int);
+
                 case 4:
-                    return typeof(string);
+                    return typeof(DateTime);
+
                 case 5:
-                    return typeof(int);
-                case 6:
                     return typeof(DateTime);
 
                 default:
@@ -239,6 +248,7 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
         {
             get { throw new NotImplementedException(); }
         }
+
         #endregion
     }
 }

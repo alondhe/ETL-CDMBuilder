@@ -28,10 +28,12 @@ namespace org.ohdsi.cdm.framework.common.Omop
         UnknownYearOfBirth
     }
 
-    public class MetadataOMOP
+    public class MetadataOMOP : Entity
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public int MetadataConceptId { get; set; }
+
+        public int MetadataTypeConceptId { get; set; }
         public string Name { get; set; }
 
         public string ValueAsString { get; set; }
@@ -43,6 +45,11 @@ namespace org.ohdsi.cdm.framework.common.Omop
         public DateTime MetadataDate { get; set; }
 
         public string MetadataDatetime { get; set; }
+
+        public override string GetKey()
+        {
+            return $"{Id}";
+        }
     }
 
     public class Metadata

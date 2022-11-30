@@ -134,6 +134,11 @@ namespace org.ohdsi.cdm.presentation.builder.Controllers
                 var locationConcepts = new List<Location>();
                 var careSiteConcepts = new List<CareSite>();
                 var providerConcepts = new List<Provider>();
+                var cdmSourceConcepts = new List<CdmSource>();
+                var metadataConcepts = new List<MetadataOMOP>();
+                var locationHistoryConcepts = new List<LocationHistory>();
+                var cohortConcepts = new List<Cohort>();
+                var cohortDefinitionConcepts = new List<framework.common.Omop.CohortDefinition>();
 
                 Console.WriteLine("Loading locations...");
                 var location = Settings.Current.Building.SourceQueryDefinitions.FirstOrDefault(qd => qd.Locations != null);
@@ -165,6 +170,46 @@ namespace org.ohdsi.cdm.presentation.builder.Controllers
                 }
                 Console.WriteLine("Providers was loaded");
 
+                Console.WriteLine("Loading CdmSource...");
+                var cdmSource = Settings.Current.Building.SourceQueryDefinitions.FirstOrDefault(qd => qd.CdmSource != null);
+                if (cdmSource != null)
+                {
+                    FillList<CdmSource>(cdmSourceConcepts, cdmSource, cdmSource.CdmSource[0]);
+                }
+                Console.WriteLine("CdmSource was loaded");
+
+                Console.WriteLine("Loading Metadata...");
+                var metadata = Settings.Current.Building.SourceQueryDefinitions.FirstOrDefault(qd => qd.Metadata != null);
+                if (metadata != null)
+                {
+                    FillList<MetadataOMOP>(metadataConcepts, metadata, metadata.Metadata[0]);
+                }
+                Console.WriteLine("Metadata was loaded");
+
+                Console.WriteLine("Loading LocationHistory...");
+                var locationHistory = Settings.Current.Building.SourceQueryDefinitions.FirstOrDefault(qd => qd.LocationHistory != null);
+                if (locationHistory != null)
+                {
+                    FillList<LocationHistory>(locationHistoryConcepts, locationHistory, locationHistory.LocationHistory[0]);
+                }
+                Console.WriteLine("LocationHistory was loaded");
+
+                Console.WriteLine("Loading Cohort...");
+                var cohort = Settings.Current.Building.SourceQueryDefinitions.FirstOrDefault(qd => qd.Cohort != null);
+                if (cohort != null)
+                {
+                    FillList<Cohort>(cohortConcepts, cohort, cohort.Cohort[0]);
+                }
+                Console.WriteLine("Cohort was loaded");
+
+                Console.WriteLine("Loading CohortDefinition...");
+                var cohortDefinition = Settings.Current.Building.SourceQueryDefinitions.FirstOrDefault(qd => qd.CohortDefinition != null);
+                if (cohortDefinition != null)
+                {
+                    FillList<framework.common.Omop.CohortDefinition>(cohortDefinitionConcepts, cohortDefinition, cohortDefinition.CohortDefinition[0]);
+                }
+                Console.WriteLine("Cohort was loaded");
+
                 Console.WriteLine("Saving lookups...");
                 var saver = Settings.Current.Building.DestinationEngine.GetSaver();
                 using (saver.Create(Settings.Current.Building.DestinationConnectionString,
@@ -172,7 +217,15 @@ namespace org.ohdsi.cdm.presentation.builder.Controllers
                     Settings.Current.Building.SourceSchema,
                     Settings.Current.Building.CdmSchema))
                 {
-                    saver.SaveEntityLookup(Settings.Current.Building.Cdm, locationConcepts, careSiteConcepts, providerConcepts, null);
+                    saver.SaveEntityLookup(Settings.Current.Building.Cdm, 
+                        locationConcepts, 
+                        careSiteConcepts, 
+                        providerConcepts, 
+                        cohortDefinitionConcepts,
+                        cdmSourceConcepts,
+                        metadataConcepts,
+                        locationHistoryConcepts,
+                        cohortConcepts);
                 }
 
                 Console.WriteLine("Lookups was saved ");
@@ -183,9 +236,19 @@ namespace org.ohdsi.cdm.presentation.builder.Controllers
                 locationConcepts.Clear();
                 careSiteConcepts.Clear();
                 providerConcepts.Clear();
+                cdmSourceConcepts.Clear();
+                metadataConcepts.Clear();
+                locationHistoryConcepts.Clear();
+                cohortConcepts.Clear();
+                cohortDefinitionConcepts.Clear();
                 locationConcepts = null;
                 careSiteConcepts = null;
                 providerConcepts = null;
+                cdmSourceConcepts = null;
+                metadataConcepts = null;
+                locationHistoryConcepts = null;
+                cohortConcepts = null;
+                cohortDefinitionConcepts = null;
                 GC.Collect();
             });
         }
