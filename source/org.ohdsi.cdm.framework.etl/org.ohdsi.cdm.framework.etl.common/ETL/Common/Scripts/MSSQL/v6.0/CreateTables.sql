@@ -486,6 +486,12 @@ CREATE TABLE {sc}.cdm_source
 	vocabulary_version varchar(250) not null
 );
 
+create table {sc}.cohort (
+			cohort_definition_id bigint not null,
+			subject_id integer not null,
+			cohort_start_date date not null,
+			cohort_end_date date not null );
+
 CREATE TABLE {sc}.cohort_definition
 (
 	cohort_definition_id bigint not null,

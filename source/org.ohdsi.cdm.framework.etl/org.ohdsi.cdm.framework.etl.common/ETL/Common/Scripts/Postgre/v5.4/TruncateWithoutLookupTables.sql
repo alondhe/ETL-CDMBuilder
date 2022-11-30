@@ -1,4 +1,5 @@
 ﻿truncate table {sc}.COHORT; 
+truncate table {sc}.COHORT_DEFINITION; 
 truncate table {sc}.CONDITION_ERA; 
 truncate table {sc}.CONDITION_OCCURRENCE; 
 truncate table {sc}.DEATH; 

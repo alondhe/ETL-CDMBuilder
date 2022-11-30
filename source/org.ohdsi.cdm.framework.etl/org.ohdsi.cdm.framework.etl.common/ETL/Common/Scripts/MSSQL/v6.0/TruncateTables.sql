@@ -23,6 +23,7 @@ IF OBJECT_ID (N'{sc}.drug_era', N'U') IS NOT NULL truncate table {sc}.drug_era;
 IF OBJECT_ID (N'{sc}.dose_era', N'U') IS NOT NULL truncate table {sc}.dose_era; 
 IF OBJECT_ID (N'{sc}.condition_era', N'U') IS NOT NULL truncate table {sc}.condition_era; 
 IF OBJECT_ID (N'{sc}.cdm_source', N'U') IS NOT NULL truncate table {sc}.cdm_source; 
+IF OBJECT_ID (N'{sc}.cohort', N'U') IS NOT NULL truncate table {sc}.cohort;
 IF OBJECT_ID (N'{sc}.cohort_definition', N'U') IS NOT NULL truncate table {sc}.cohort_definition; 
 IF OBJECT_ID (N'{sc}.cdm_domain_meta', N'U') IS NOT NULL truncate table {sc}.cdm_domain_meta; 
 IF OBJECT_ID (N'{sc}.metadata', N'U') IS NOT NULL truncate table {sc}.metadata; 
