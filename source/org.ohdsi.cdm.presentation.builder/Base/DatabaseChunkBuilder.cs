@@ -13,15 +13,16 @@ namespace org.ohdsi.cdm.presentation.builder.Base
     public class DatabaseChunkBuilder
     {
         #region Variables
-
+        private readonly int _conversionId;
         private readonly int _chunkId;
         private readonly Func<IPersonBuilder> _createPersonBuilder;
         #endregion
 
         #region Constructors
 
-        public DatabaseChunkBuilder(int chunkId, Func<IPersonBuilder> createPersonBuilder)
+        public DatabaseChunkBuilder(int conversionId, int chunkId, Func<IPersonBuilder> createPersonBuilder)
         {
+            _conversionId = conversionId;
             _chunkId = chunkId;
             _createPersonBuilder = createPersonBuilder;
         }
@@ -34,7 +35,7 @@ namespace org.ohdsi.cdm.presentation.builder.Base
             {
                 Console.WriteLine("DatabaseChunkBuilder");
 
-                var part = new DatabaseChunkPart(_chunkId, _createPersonBuilder, "0", 0);
+                var part = new DatabaseChunkPart(_conversionId, _chunkId, _createPersonBuilder, "0", 0);
 
                 var timer = new Stopwatch();
                 timer.Start();

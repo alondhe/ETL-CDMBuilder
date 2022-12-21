@@ -56,7 +56,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             {
                 foreach (var chunk in GetPersonKeys(ChunkSize))
                 {
-                    DBBuilder.AddChunk(connectionString, chunkId, conversionId);
+                    
                     chunks.AddRange(chunk.Select(c =>
                         new ChunkRecord { Id = chunkId, PersonId = Convert.ToInt64(c.Key), PersonSource = c.Value }));
 
@@ -65,10 +65,15 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
 
                 if (chunks.Count > 0)
                 {
-                    saver.AddChunk(chunks, k);
+                    saver.AddChunk(conversionId, chunks, k);
                 }
 
                 saver.Commit();
+
+                foreach (var cId in chunks.Select(c => c.Id).Distinct())
+                {
+                    DBBuilder.AddChunk(connectionString, cId, conversionId);
+                }
             }
 
             Console.WriteLine("Chunk ids were generated and saved, total count=" + chunkId);

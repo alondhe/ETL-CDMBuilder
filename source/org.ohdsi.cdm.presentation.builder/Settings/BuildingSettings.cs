@@ -99,6 +99,9 @@ namespace org.ohdsi.cdm.presentation.builder
                 if (ConfigurationManager.ConnectionStrings["SourceConnectionStringTemplate"].ConnectionString.ToLower().Contains("mysql"))
                     return new MySqlDatabaseEngine();
 
+                if (ConfigurationManager.ConnectionStrings["SourceConnectionStringTemplate"].ConnectionString.ToLower().Contains("databricks"))
+                    return new AzureDatabricksDatabaseEngine();
+
                 return new MssqlDatabaseEngine();
             }
         }
@@ -113,6 +116,9 @@ namespace org.ohdsi.cdm.presentation.builder
 
                 if (ConfigurationManager.ConnectionStrings["DestinationConnectionStringTemplate"].ConnectionString.ToLower().Contains("mysql"))
                     return new MySqlDatabaseEngine();
+
+                if (ConfigurationManager.ConnectionStrings["SourceConnectionStringTemplate"].ConnectionString.ToLower().Contains("databricks"))
+                    return new AzureDatabricksDatabaseEngine();
 
                 return new MssqlDatabaseEngine();
             }

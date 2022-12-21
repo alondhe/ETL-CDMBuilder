@@ -60,7 +60,7 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
             return Database.Postgre;
         }
 
-        public override void Write(int? chunkId, int? subChunkId, System.Data.IDataReader reader, string tableName)
+        public override void Write(int? conversionId, int? chunkId, int? subChunkId, System.Data.IDataReader reader, string tableName)
         {
             if (reader == null)
                 return;

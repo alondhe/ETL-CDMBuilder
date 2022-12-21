@@ -217,7 +217,7 @@ namespace org.ohdsi.cdm.presentation.builder.Controllers
                     Settings.Current.Building.SourceSchema,
                     Settings.Current.Building.CdmSchema))
                 {
-                    saver.SaveEntityLookup(Settings.Current.Building.Cdm, 
+                    saver.SaveEntityLookup(0, Settings.Current.Building.Cdm, 
                         locationConcepts, 
                         careSiteConcepts, 
                         providerConcepts, 
@@ -357,7 +357,7 @@ namespace org.ohdsi.cdm.presentation.builder.Controllers
 
                           if (!Settings.Current.Building.CompletedChunkIds.Contains(chunkId))
                           {
-                              var chunk = new DatabaseChunkBuilder(chunkId, CreatePersonBuilder);
+                              var chunk = new DatabaseChunkBuilder(0, chunkId, CreatePersonBuilder);
 
                               //using (var connection =
                               //    new OdbcConnection(Settings.Current.Building.SourceConnectionString))

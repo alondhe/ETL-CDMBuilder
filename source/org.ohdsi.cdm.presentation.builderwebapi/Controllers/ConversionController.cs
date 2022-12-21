@@ -242,7 +242,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                 _settings.ConversionSettings.SourceSchema,
                 _settings.ConversionSettings.DestinationSchema))
             {
-                saver.SaveEntityLookup(_settings.Cdm, 
+                saver.SaveEntityLookup(_conversionId,
+                    _settings.Cdm, 
                     locationConcepts, 
                     careSiteConcepts, 
                     providerConcepts,
@@ -275,7 +276,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                             VocabularyVersion = "5.3",
                             CdmHolder = "unknown"
                         });
-                        saver.Write(null, null, reader, "CDM_SOURCE");
+                        saver.Write(null, null, null, reader, "CDM_SOURCE");
                         saver.Commit();
                     }
                     else if (_settings.Cdm == framework.common.Enums.CdmVersions.V54)
@@ -293,7 +294,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                             VocabularyVersion = "5.4",
                             CdmHolder = "unknown"
                         });
-                        saver.Write(null, null, reader, "CDM_SOURCE");
+                        saver.Write(null, null, null, reader, "CDM_SOURCE");
                         saver.Commit();
                     }
                     else
@@ -311,7 +312,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                             VocabularyVersion = "6.0",
                             CdmHolder = "unknown"
                         });
-                        saver.Write(null, null, reader, "CDM_SOURCE");
+                        saver.Write(null, null, null, reader, "CDM_SOURCE");
                         saver.Commit();
                     }
                 }

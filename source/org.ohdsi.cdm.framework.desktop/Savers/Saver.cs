@@ -539,7 +539,7 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                 if (reader == null)
                     continue;
 
-                Write(chunk.ChunkId, chunk.SubChunkId, reader, table);
+                Write(chunk.ConversionId, chunk.ChunkId, chunk.SubChunkId, reader, table);
             }
             //Logger.Write(chunk.ChunkId, LogMessageTypes.Debug, "END - " + table);
         }
@@ -573,7 +573,7 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                 if (CdmVersion == CdmVersions.V53 || CdmVersion == CdmVersions.V54 || CdmVersion == CdmVersions.V6)
                 {
                     Write(chunk, "VISIT_DETAIL");
-                    Write(chunk.ChunkId, chunk.SubChunkId, new MetadataDataReader(chunk.Metadata.Values.ToList()), "METADATA_TMP");
+                    Write(chunk.ConversionId, chunk.ChunkId, chunk.SubChunkId, new MetadataDataReader(chunk.Metadata.Values.ToList()), "METADATA_TMP");
                 }
 
                 Write(chunk, "FACT_RELATIONSHIP");
@@ -599,7 +599,7 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
             }
         }
 
-        public virtual void SaveEntityLookup(CdmVersions cdmVersions, 
+        public virtual void SaveEntityLookup(int conversionId, CdmVersions cdmVersions, 
             List<Location> location, 
             List<CareSite> careSite, 
             List<Provider> provider, 
@@ -614,65 +614,65 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                 if (cdmVersions == CdmVersions.V6)
                 {
                     if (location != null && location.Count > 0)
-                        Write(null, null, new cdm6.LocationDataReader(location), "LOCATION");
+                        Write(conversionId, null, null, new cdm6.LocationDataReader(location), "LOCATION");
 
                     if (careSite != null && careSite.Count > 0)
-                        Write(null, null, new cdm6.CareSiteDataReader(careSite), "CARE_SITE");
+                        Write(conversionId, null, null, new cdm6.CareSiteDataReader(careSite), "CARE_SITE");
 
                     if (provider != null && provider.Count > 0)
-                        Write(null, null, new cdm6.ProviderDataReader(provider), "PROVIDER");
+                        Write(conversionId, null, null, new cdm6.ProviderDataReader(provider), "PROVIDER");
 
                     if (locationHistory != null && locationHistory.Count > 0)
-                        Write(null, null, new cdm6.LocationHistoryDataReader(locationHistory), "LOCATION_HISTORY");
+                        Write(conversionId, null, null, new cdm6.LocationHistoryDataReader(locationHistory), "LOCATION_HISTORY");
                 }
                 else
                 {
                     if (location != null && location.Count > 0)
                     {
                         if (cdmVersions == CdmVersions.V54)
-                            Write(null, null, new LocationDataReader54(location), "LOCATION");
+                            Write(conversionId, null, null, new LocationDataReader54(location), "LOCATION");
                         else
-                            Write(null, null, new LocationDataReader(location), "LOCATION");
+                            Write(conversionId, null, null, new LocationDataReader(location), "LOCATION");
                     }
 
                     if (careSite != null && careSite.Count > 0)
-                        Write(null, null, new CareSiteDataReader(careSite), "CARE_SITE");
+                        Write(conversionId, null, null, new CareSiteDataReader(careSite), "CARE_SITE");
 
                     if (provider != null && provider.Count > 0)
                     {
                         foreach (var chunk in SplitList(provider))
                         {
-                            Write(null, null, new ProviderDataReader(chunk), "PROVIDER");
+                            Write(conversionId, null, null, new ProviderDataReader(chunk), "PROVIDER");
                         }
                     }
                 }
 
                 if (cohortDefinition != null && cohortDefinition.Count > 0)
                 {
-                    Write(null, null, new cdm6.CohortDefinitionDataReader(cohortDefinition), "COHORT_DEFINITION");
+                    Write(conversionId, null, null, new cdm6.CohortDefinitionDataReader(cohortDefinition), "COHORT_DEFINITION");
                 }
 
                 if (cohort != null && cohort.Count > 0)
                 {
-                    Write(null, null, new cdm6.CohortDataReader(cohort), "COHORT");
+                    Write(conversionId, null, null, new cdm6.CohortDataReader(cohort), "COHORT");
                 }
 
                 if (cdmSource != null && cdmSource.Count > 0)
                 {
                     if (cdmVersions == CdmVersions.V54)
-                        Write(null, null, new CdmSourceDataReader54(cdmSource[0]), "CDM_SOURCE");
+                        Write(conversionId, null, null, new CdmSourceDataReader54(cdmSource[0]), "CDM_SOURCE");
                     else
-                        Write(null, null, new CdmSourceDataReader(cdmSource[0]), "CDM_SOURCE");
+                        Write(conversionId, null, null, new CdmSourceDataReader(cdmSource[0]), "CDM_SOURCE");
                 }
 
                 if (metadata != null && metadata.Count > 0)
                 {
                     if (cdmVersions == CdmVersions.V53)
-                        Write(null, null, new MetadataOMOPDataReader53(metadata), "METADATA");
+                        Write(conversionId, null, null, new MetadataOMOPDataReader53(metadata), "METADATA");
                     else if (cdmVersions == CdmVersions.V54)
-                        Write(null, null, new MetadataOMOPDataReader54(metadata), "METADATA");
+                        Write(conversionId, null, null, new MetadataOMOPDataReader54(metadata), "METADATA");
                     else
-                        Write(null, null, new cdm6.MetadataOMOPDataReader6(metadata), "METADATA");
+                        Write(conversionId, null, null, new cdm6.MetadataOMOPDataReader6(metadata), "METADATA");
                 }
 
                 Commit();
@@ -701,11 +701,11 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                 yield return list;
         }
 
-        public virtual void AddChunk(List<ChunkRecord> chunk, int index)
+        public virtual void AddChunk(int conversionId, List<ChunkRecord> chunk, int index)
         {
             try
             {
-                Write(null, null, new ChunkDataReader(chunk), "_chunks");
+                Write(conversionId, null, null, new ChunkDataReader(chunk), "_chunks");
             }
             catch (Exception e)
             {
@@ -714,7 +714,7 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
             }
         }
 
-        public virtual void Write(int? chunkId, int? subChunkId, IDataReader reader, string tableName)
+        public virtual void Write(int? conversionId, int? chunkId, int? subChunkId, IDataReader reader, string tableName)
         {
             throw new NotImplementedException();
         }

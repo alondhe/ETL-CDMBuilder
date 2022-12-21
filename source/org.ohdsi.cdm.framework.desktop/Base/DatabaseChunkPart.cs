@@ -14,18 +14,20 @@ namespace org.ohdsi.cdm.framework.desktop.Base
 {
     public class DatabaseChunkPart : ChunkPart
     {
+        private int _conversionId;
         public ChunkData ChunkData { get; private set; }
 
-        public DatabaseChunkPart(int chunkId, Func<IPersonBuilder> createPersonBuilder, string prefix, int attempt) : base(chunkId, createPersonBuilder, prefix, attempt)
+        public DatabaseChunkPart(int conversionId, int chunkId, Func<IPersonBuilder> createPersonBuilder, string prefix, int attempt) : base(chunkId, createPersonBuilder, prefix, attempt)
         {
-            ChunkData = new ChunkData(ChunkId, int.Parse(Prefix));
+            _conversionId = conversionId;
+            ChunkData = new ChunkData(_conversionId, ChunkId, int.Parse(Prefix));
             PersonBuilders = new Dictionary<long, Lazy<IPersonBuilder>>();
             OffsetManager = new KeyMasterOffsetManager(ChunkId, int.Parse(Prefix), 0);
         }
 
         public void Reset()
         {
-            ChunkData = new ChunkData(ChunkId, int.Parse(Prefix));
+            ChunkData = new ChunkData(_conversionId, ChunkId, int.Parse(Prefix));
             PersonBuilders = new Dictionary<long, Lazy<IPersonBuilder>>();
             OffsetManager = new KeyMasterOffsetManager(ChunkId, int.Parse(Prefix), 0);
         }

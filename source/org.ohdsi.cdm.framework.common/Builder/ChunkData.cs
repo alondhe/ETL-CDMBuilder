@@ -7,7 +7,7 @@ namespace org.ohdsi.cdm.framework.common.Builder
 {
     public class ChunkData
     {
-
+        public int ConversionId { get; set; }
         public int SubChunkId { get; set; }
         public int ChunkId { get; set; }
 
@@ -40,8 +40,9 @@ namespace org.ohdsi.cdm.framework.common.Builder
 
         public List<Episode> Episode { get; private set; }
 
-        public ChunkData(int chunkId, int subChunkId)
+        public ChunkData(int conversionId, int chunkId, int subChunkId)
         {
+            ConversionId = conversionId;
             ChunkId = chunkId;
             SubChunkId = subChunkId;
             Init();

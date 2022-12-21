@@ -160,6 +160,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                 databaseType = framework.desktop.Enums.Database.MySql;
             else if (dbType.ToLower() == "azure")
                 databaseType = framework.desktop.Enums.Database.MsSql;
+            else if (dbType.ToLower().Contains("databricks"))
+                databaseType = framework.desktop.Enums.Database.AzureDatabricks;
 
             using var c = SqlConnectionHelper.OpenConnection(connection, databaseType);
         }

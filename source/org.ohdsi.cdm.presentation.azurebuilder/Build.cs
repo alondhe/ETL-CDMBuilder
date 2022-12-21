@@ -64,7 +64,7 @@ namespace org.ohdsi.cdm.presentation.azurebuilder
                 Logger.Write(connectionString, new LogMessage { ConversionId = conversionId, Type = LogType.Info, Text = "Vocabulary DONE." });
                 log.LogInformation($"conversionId {conversionId}; chunkId {chunkId} | Vocabulary DONE.");
 
-                var chunkBuilder = new DatabaseChunkBuilder(chunkId);
+                var chunkBuilder = new DatabaseChunkBuilder(conversionId, chunkId);
                 var chunkData = chunkBuilder.Process(settings.SourceEngine,
                     settings.ConversionSettings.SourceSchema,
                     settings.SourceQueryDefinitions,

@@ -20,12 +20,17 @@ namespace org.ohdsi.cdm.framework.desktop.DbLayer
                 _engine = new MySqlDatabaseEngine();
             else if (_connectionString.ToLower().Contains("postgres"))
                 _engine = new PostgreDatabaseEngine();
+            else if (_connectionString.ToLower().Contains("databricks"))
+                _engine = new AzureDatabricksDatabaseEngine();
             else
                 _engine = new MssqlDatabaseEngine();
         }
 
         public void CreateDatabase(string query)
         {
+            if (string.IsNullOrWhiteSpace(query) || string.IsNullOrEmpty(query))
+                return;
+
             var sqlConnectionStringBuilder = new OdbcConnectionStringBuilder(_connectionString);
             var database = sqlConnectionStringBuilder["database"];
 
