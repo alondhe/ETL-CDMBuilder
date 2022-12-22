@@ -31,7 +31,7 @@ RUN curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql17
 
 RUN apt-get install -y odbc-postgresql
-RUN apt-get install -y unzip
+RUN apt-get update && apt-get install -y unzip
 
 RUN curl -sL https://databricks-bi-artifacts.s3.us-east-2.amazonaws.com/simbaspark-drivers/odbc/2.6.29/SimbaSparkODBC-2.6.29.1049-Debian-64bit.zip -o databricksOdbc.zip && unzip databricksOdbc.zip
 RUN dpkg -i simbaspark_2.6.29.1049-2_amd64.deb
