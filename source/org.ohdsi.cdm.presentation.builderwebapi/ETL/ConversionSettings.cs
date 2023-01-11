@@ -37,6 +37,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
         public object DestinationPort { get; set; }
         public object VocabularyPort { get; set; }
 
+        public string SourceHttppath { get; set; }
+        public string DestinationHttppath { get; set; }
+
         public string MappingsName { get; set; }
         public string CdmVersion { get; set; } = "v5.3";
 

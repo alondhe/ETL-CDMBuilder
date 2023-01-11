@@ -94,7 +94,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                                      settings.SourceDatabase,
                                      settings.SourceUser,
                                      settings.SourcePassword,
-                                     settings.SourcePort.ToString());
+                                     settings.SourcePort.ToString(),
+                                     settings.SourceHttppath);
             }
             catch (Exception e)
             {
@@ -114,7 +115,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                                      settings.DestinationDatabase,
                                      settings.DestinationUser,
                                      settings.DestinationPassword,
-                                     settings.DestinationPort.ToString());
+                                     settings.DestinationPort.ToString(),
+                                     settings.DestinationHttppath);
             }
             catch (Exception e)
             {
@@ -134,7 +136,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                                      settings.VocabularyDatabase,
                                      settings.VocabularyUser,
                                      settings.VocabularyPassword,
-                                     settings.VocabularyPort.ToString());
+                                     settings.VocabularyPort.ToString(),
+                                     null);
             }
             catch (Exception e)
             {
@@ -144,11 +147,11 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             return Ok();
         }
 
-        private void ChekConnectionString(string dbType, string server, string db, string user, string pswd, string port)
+        private void ChekConnectionString(string dbType, string server, string db, string user, string pswd, string port, string httppath)
         {
             var connection = _conf[dbType].Replace("{server}", server)
                                                    .Replace("{database}", db)
-                                                   .Replace("{username}", user)
+                                                   .Replace("{username}", user ?? httppath)
                                                    .Replace("{password}", pswd)
                                                    .Replace("{port}", port);
             
@@ -293,6 +296,16 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                 if (settings.DestinationEngine.ToLower() == "azure")
                 {
                     settings.DestinationEngine = "MSSQL";
+                }
+
+                if (settings.SourceEngine.ToLower() == "databricks")
+                {
+                    settings.SourceUser = settings.SourceHttppath;
+                }
+
+                if (settings.DestinationEngine.ToLower() == "databricks")
+                {
+                    settings.DestinationUser = settings.DestinationHttppath;
                 }
 
                 if (settings.VocabularyEngine == null)
