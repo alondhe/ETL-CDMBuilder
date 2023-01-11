@@ -35,8 +35,7 @@ RUN apt-get update && apt-get install -y unzip libsasl2-modules-gssapi-mit
 
 RUN curl -sL https://databricks-bi-artifacts.s3.us-east-2.amazonaws.com/simbaspark-drivers/odbc/2.6.29/SimbaSparkODBC-2.6.29.1049-Debian-64bit.zip -o databricksOdbc.zip && unzip databricksOdbc.zip
 RUN dpkg -i simbaspark_2.6.29.1049-2_amd64.deb
-RUN export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-RUN export ODBCINI=/etc/odbc.ini ODBCSYSINI=/etc/odbcinst.ini SIMBASPARKINI=/opt/simba/spark/lib/64/simba.sparkodbc.ini
+RUN printf '%s\n' "[Simba Spark ODBC Driver]" "Description=Simba Apache Spark ODBC Connector (64-bit)" "Driver=/opt/simba/spark/lib/64/libsparkodbc_sb64.so" >>/etc/odbcinst.ini
 
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "org.ohdsi.cdm.presentation.builderwebapi.dll"]
