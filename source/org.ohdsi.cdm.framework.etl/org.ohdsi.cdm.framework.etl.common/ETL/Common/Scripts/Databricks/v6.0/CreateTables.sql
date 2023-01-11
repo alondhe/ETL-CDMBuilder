@@ -1,5 +1,6 @@
 CREATE TABLE {sc}.person 
-USING DELTA AS	
+USING DELTA AS
+SELECT 	
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS gender_concept_id,
 	CAST(NULL AS integer) AS year_of_birth,
@@ -22,6 +23,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.observation_period 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS observation_period_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS date) AS observation_period_start_date,
@@ -30,6 +32,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.specimen 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS specimen_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS specimen_concept_id,
@@ -48,6 +51,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.visit_occurrence 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS visit_occurrence_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS visit_concept_id,
@@ -68,6 +72,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.visit_detail 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS visit_detail_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS visit_detail_concept_id,
@@ -89,7 +94,9 @@ USING DELTA AS
 	CAST(NULL AS bigint) AS visit_occurrence_id WHERE 1 = 0;
 
 CREATE TABLE {sc}.procedure_occurrence 
-USING DELTA AS	CAST(NULL AS bigint) AS procedure_occurrence_id,
+USING DELTA AS	
+SELECT 	
+	CAST(NULL AS bigint) AS procedure_occurrence_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS procedure_concept_id,
 	CAST(NULL AS date) AS procedure_date,
@@ -104,7 +111,10 @@ USING DELTA AS	CAST(NULL AS bigint) AS procedure_occurrence_id,
 	CAST(NULL AS integer) AS procedure_source_concept_id,
 	CAST(NULL AS STRING) AS modifier_source_value WHERE 1 = 0;
 
-CREATE TABLE {sc}.drug_exposure USING DELTA AS	CAST(NULL AS bigint) AS drug_exposure_id,
+CREATE TABLE {sc}.drug_exposure 
+USING DELTA AS	
+SELECT 	
+	CAST(NULL AS bigint) AS drug_exposure_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS drug_concept_id,
 	CAST(NULL AS date) AS drug_exposure_start_date,
@@ -130,6 +140,7 @@ CREATE TABLE {sc}.drug_exposure USING DELTA AS	CAST(NULL AS bigint) AS drug_expo
 
 CREATE TABLE {sc}.device_exposure 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS device_exposure_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS device_concept_id,
@@ -148,6 +159,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.condition_occurrence 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS condition_occurrence_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS condition_concept_id,
@@ -167,6 +179,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.measurement 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS measurement_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS measurement_concept_id,
@@ -190,6 +203,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.note 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS note_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS bigint) AS note_event_id,
@@ -209,6 +223,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.note_nlp 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS note_nlp_id,
 	CAST(NULL AS bigint) AS note_id,
 	CAST(NULL AS integer) AS section_concept_id,
@@ -226,6 +241,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.observation 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS observation_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS observation_concept_id,
@@ -250,6 +266,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.survey_conduct 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS survey_conduct_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS survey_concept_id,
@@ -278,6 +295,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.fact_relationship 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS integer) AS domain_concept_id_1,
 	CAST(NULL AS bigint) AS fact_id_1,
 	CAST(NULL AS integer) AS domain_concept_id_2,
@@ -286,6 +304,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.location 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS location_id,
 	CAST(NULL AS STRING) AS address_1,
 	CAST(NULL AS STRING) AS address_2,
@@ -300,6 +319,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.location_history 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS location_history_id,
 	CAST(NULL AS bigint) AS location_id,
 	CAST(NULL AS integer) AS relationship_type_concept_id,
@@ -310,6 +330,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.care_site 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS care_site_id,
 	CAST(NULL AS STRING) AS care_site_name,
 	CAST(NULL AS integer) AS place_of_service_concept_id,
@@ -319,6 +340,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.provider 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS provider_id,
 	CAST(NULL AS STRING) AS provider_name,
 	CAST(NULL AS STRING) AS NPI,
@@ -335,6 +357,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.payer_plan_period 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS payer_plan_period_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS bigint) AS contract_person_id,
@@ -359,6 +382,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.cost 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS cost_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS bigint) AS cost_event_id,
@@ -380,6 +404,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.drug_era 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS drug_era_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS drug_concept_id,
@@ -390,6 +415,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.dose_era 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS dose_era_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS drug_concept_id,
@@ -400,6 +426,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.condition_era 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS condition_era_id,
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS integer) AS condition_concept_id,
@@ -409,6 +436,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.cdm_source 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS STRING) AS cdm_source_name,
 	CAST(NULL AS STRING) AS cdm_source_abbreviation,
 	CAST(NULL AS STRING) AS cdm_holder,
@@ -422,6 +450,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.cohort 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS cohort_definition_id,
 	CAST(NULL AS bigint) AS subject_id,
 	CAST(NULL AS date) AS cohort_start_date,
@@ -429,6 +458,7 @@ USING DELTA AS
 
 CREATE TABLE {sc}.cohort_definition 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS cohort_definition_id,
 	CAST(NULL AS STRING) AS cohort_definition_name,
 	CAST(NULL AS STRING) AS cohort_definition_description,
@@ -439,11 +469,13 @@ USING DELTA AS
 
 CREATE TABLE {sc}.cdm_domain_meta 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS STRING) AS domain_id,
 	CAST(NULL AS STRING) AS description WHERE 1 = 0;
 
 CREATE TABLE {sc}.metadata 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS integer) AS metadata_concept_id,
 	CAST(NULL AS STRING) AS name,
 	CAST(NULL AS STRING) AS value_as_string,
@@ -453,5 +485,6 @@ USING DELTA AS
 
 CREATE TABLE {sc}.metadata_tmp 
 USING DELTA AS	
+SELECT 	
 	CAST(NULL AS bigint) AS person_id,
 	CAST(NULL AS STRING) AS name  WHERE 1 = 0;
