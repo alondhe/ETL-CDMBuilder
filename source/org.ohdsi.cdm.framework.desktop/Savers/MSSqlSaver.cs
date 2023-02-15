@@ -39,7 +39,7 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
             return Database.MsSql;
         }
 
-        public override void Write(int? chunkId, int? subChunkId, System.Data.IDataReader reader, string tableName)
+        public override void Write(int? conversionId, int? chunkId, int? subChunkId, System.Data.IDataReader reader, string tableName)
         {
             if (tableName.ToLower().StartsWith("_chunks"))
             {

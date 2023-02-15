@@ -7,7 +7,7 @@ namespace org.ohdsi.cdm.framework.common.Builder
 {
     public class ChunkData
     {
-
+        public int ConversionId { get; set; }
         public int SubChunkId { get; set; }
         public int ChunkId { get; set; }
 
@@ -27,15 +27,22 @@ namespace org.ohdsi.cdm.framework.common.Builder
         public List<EraEntity> ConditionEra { get; private set; }
         public List<EraEntity> DrugEra { get; private set; }
         public List<Cohort> Cohort { get; private set; }
+        public List<CohortDefinition> CohortDefinition { get; private set; }
         public List<DeviceExposure> DeviceExposure { get; private set; }
 
         public List<Cost> Cost { get; private set; }
         public Dictionary<long, Metadata> Metadata { get; private set; }
 
         public List<FactRelationship> FactRelationships { get; private set; }
+        public List<Specimen> Specimen { get; private set; }
 
-        public ChunkData(int chunkId, int subChunkId)
+        public List<SurveyConduct> SurveyConduct { get; private set; }
+
+        public List<Episode> Episode { get; private set; }
+
+        public ChunkData(int conversionId, int chunkId, int subChunkId)
         {
+            ConversionId = conversionId;
             ChunkId = chunkId;
             SubChunkId = subChunkId;
             Init();
@@ -76,10 +83,14 @@ namespace org.ohdsi.cdm.framework.common.Builder
             ConditionEra = new List<EraEntity>();
             DrugEra = new List<EraEntity>();
             Cohort = new List<Cohort>();
+            CohortDefinition = new List<CohortDefinition>();
             DeviceExposure = new List<DeviceExposure>();
             Cost = new List<Cost>();
             Note = new List<Note>();
             FactRelationships = new List<FactRelationship>();
+            Specimen = new List<Specimen>();
+            SurveyConduct = new List<SurveyConduct>();
+            Episode = new List<Episode>();
         }
 
         public void Clean()
@@ -100,10 +111,14 @@ namespace org.ohdsi.cdm.framework.common.Builder
             ConditionEra = null;
             DrugEra = null;
             Cohort = null;
+            CohortDefinition = null;
             DeviceExposure = null;
             Cost = null;
             Note = null;
             FactRelationships = null;
+            Specimen = null;
+            SurveyConduct = null;
+            Episode = null;
         }
 
         public bool AddCostData(Cost cost)
@@ -182,6 +197,12 @@ namespace org.ohdsi.cdm.framework.common.Builder
                         break;
                     }
 
+                case EntityType.CohortDefinition:
+                    {
+                        CohortDefinition.Add((CohortDefinition)data);
+                        break;
+                    }
+
                 case EntityType.Measurement:
                     {
                         Measurements.Add((Measurement)data);
@@ -215,6 +236,30 @@ namespace org.ohdsi.cdm.framework.common.Builder
                 case EntityType.Note:
                     {
                         Note.Add((Note)data);
+                        break;
+                    }
+
+                case EntityType.FactRelationship:
+                    {
+                        FactRelationships.Add((FactRelationship)data);
+                        break;
+                    }
+
+                case EntityType.Specimen:
+                    {
+                        Specimen.Add((Specimen)data);
+                        break;
+                    }
+
+                case EntityType.SurveyConduct:
+                    {
+                        SurveyConduct.Add((SurveyConduct)data);
+                        break;
+                    }
+
+                case EntityType.Episode:
+                    {
+                        Episode.Add((Episode)data);
                         break;
                     }
             }

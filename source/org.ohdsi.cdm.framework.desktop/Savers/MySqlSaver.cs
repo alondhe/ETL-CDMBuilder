@@ -40,7 +40,7 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
             return Database.MySql;
         }
 
-        public override void Write(int? chunkId, int? subChunkId, System.Data.IDataReader reader, string tableName)
+        public override void Write(int? conversionId, int? chunkId, int? subChunkId, System.Data.IDataReader reader, string tableName)
         {
             var bulkCopy = new MySqlBulkCopy(_connection, _transaction)
             {

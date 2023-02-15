@@ -48,12 +48,15 @@ namespace org.ohdsi.cdm.framework.common.Base
             AddEntity(queryDefinition, queryDefinition.ConditionOccurrence, reader, recordGuid, "ConditionOccurrence");
             AddEntity(queryDefinition, queryDefinition.ProcedureOccurrence, reader, recordGuid, "ProcedureOccurrence");
             AddEntity(queryDefinition, queryDefinition.DrugExposure, reader, recordGuid, "DrugExposure");
-            AddEntity(queryDefinition, queryDefinition.Cohort, reader, recordGuid, "Cohort");
+            //AddEntity(queryDefinition, queryDefinition.Cohort, reader, recordGuid, "Cohort");
             AddEntity(queryDefinition, queryDefinition.Measurement, reader, recordGuid, "Measurement");
             AddEntity(queryDefinition, queryDefinition.DeviceExposure, reader, recordGuid, "DeviceExposure");
             AddEntity(queryDefinition, queryDefinition.Note, reader, recordGuid, "Note");
             AddEntity(queryDefinition, queryDefinition.Episode, reader, recordGuid, "Episode");
             AddEntity(queryDefinition, queryDefinition.EpisodeEvent, reader, recordGuid, "EpisodeEvent");
+            AddEntity(queryDefinition, queryDefinition.Specimen, reader, recordGuid, "Specimen");
+            AddEntity(queryDefinition, queryDefinition.SurveyConduct, reader, recordGuid, "SurveyConduct");
+
         }
 
 
@@ -64,7 +67,18 @@ namespace org.ohdsi.cdm.framework.common.Base
 
         private Concept GetCoreConcept(Concept[] concepts)
         {
-            var names = new[] { "VisitConceptId", "ProcedureConceptId", "ObservationConceptId", "DrugConceptId", "DeviceConceptId", "ConditionConceptId", "MeasurementConceptId" };
+            var names = new[] { 
+                "VisitConceptId", 
+                "ProcedureConceptId", 
+                "ObservationConceptId", 
+                "DrugConceptId", 
+                "DeviceConceptId", 
+                "ConditionConceptId", 
+                "MeasurementConceptId", 
+                "SpecimenConceptId", 
+                "SurveyConceptId",
+                "EpisodeConceptId"
+            };
 
             foreach (var name in names)
             {

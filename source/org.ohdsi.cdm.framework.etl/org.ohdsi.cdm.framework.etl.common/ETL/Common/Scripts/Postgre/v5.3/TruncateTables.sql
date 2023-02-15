@@ -1,6 +1,7 @@
 ﻿truncate table {sc}.CDM_SOURCE;
 truncate table {sc}.CARE_SITE; 
 truncate table {sc}.COHORT; 
+truncate table {sc}.COHORT_DEFINITION; 
 truncate table {sc}.COHORT_ATTRIBUTE; 
 truncate table {sc}.CONDITION_ERA; 
 truncate table {sc}.CONDITION_OCCURRENCE; 

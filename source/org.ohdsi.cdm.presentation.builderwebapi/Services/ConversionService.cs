@@ -124,7 +124,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
                 {
                     var settings = GetSettings(conversionId);
 
-                    var chunkBuilder = new DatabaseChunkBuilder(chunkId);
+                    var chunkBuilder = new DatabaseChunkBuilder(conversionId, chunkId);
                     var chunkData = chunkBuilder.Process(settings.SourceEngine,
                         settings.ConversionSettings.SourceSchema,
                         settings.SourceQueryDefinitions,

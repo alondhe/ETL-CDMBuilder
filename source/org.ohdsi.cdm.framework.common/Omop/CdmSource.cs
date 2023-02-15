@@ -2,7 +2,7 @@
 
 namespace org.ohdsi.cdm.framework.common.Omop
 {
-    public class CdmSource
+    public class CdmSource : Entity
     {
         public string CdmSourceName { get; set; }
         public string CdmSourceAbbreviation { get; set; }
@@ -18,6 +18,11 @@ namespace org.ohdsi.cdm.framework.common.Omop
 
         public CdmSource()
         {
+        }
+
+        public override string GetKey()
+        {
+            return $"{CdmSourceName};{SourceReleaseDate};{CdmVersion};{VocabularyVersion}";
         }
     }
 }

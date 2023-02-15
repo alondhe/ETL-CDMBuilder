@@ -44,7 +44,7 @@ namespace org.ohdsi.cdm.framework.common.DataReaders.v6
                 case 5:
                     return _cohortEnumerator.Current.ConceptId;
                 case 6:
-                    return _cohortEnumerator.Current.Date;
+                    return _cohortEnumerator.Current.StartDate;
 
                 default:
                     throw new NotImplementedException();

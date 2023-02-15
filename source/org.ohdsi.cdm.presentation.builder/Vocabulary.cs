@@ -186,6 +186,9 @@ namespace org.ohdsi.cdm.presentation.builder
                     Load(qd.Note);
                     Load(qd.Episode);
                     Load(qd.EpisodeEvent);
+                    Load(qd.FactRelationship);
+                    Load(qd.Specimen);
+                    Load(qd.SurveyConduct);
 
                     Load(qd.VisitCost);
                     Load(qd.ProcedureCost);

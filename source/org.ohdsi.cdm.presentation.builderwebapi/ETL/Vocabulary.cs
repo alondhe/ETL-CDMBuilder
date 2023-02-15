@@ -268,6 +268,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                     Load(qd.Note);
                     Load(qd.Episode);
                     Load(qd.EpisodeEvent);
+                    Load(qd.FactRelationship);
+                    Load(qd.Specimen);
+                    Load(qd.SurveyConduct);
 
                     Load(qd.VisitCost);
                     Load(qd.ProcedureCost);
@@ -302,6 +305,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                 Attach(qd.Note);
                 Attach(qd.Episode);
                 Attach(qd.EpisodeEvent);
+                Attach(qd.FactRelationship);
+                Attach(qd.Specimen);
+                Attach(qd.SurveyConduct);
 
                 Attach(qd.VisitCost);
                 Attach(qd.ProcedureCost);
@@ -397,10 +403,10 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                 lookup.Fill((Dictionary<string, Dictionary<int, LookupValue>>)lookupContent);
                 _lookups.Add(name, lookup);
 
-                Attach();
-
                 WriteLog(LogType.Info, name + " - Downloading DONE", 0);
             }
+
+            Attach();
         }
 
         public void StoreToFileManager(string userName, string fileManagerUrl, string secureKey)

@@ -16,9 +16,18 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
         ISaver Create(string connectionString, CdmVersions cdmVersion, string sourceSchema, string destinationSchema);
         Database GetDatabaseType();
         void Save(ChunkData chunk, KeyMasterOffsetManager offsetManager);
-        void SaveEntityLookup(CdmVersions cdmVersions, List<Location> location, List<CareSite> careSite, List<Provider> provider, List<CohortDefinition> cohortDefinition);
-        void AddChunk(List<ChunkRecord> chunk, int index);
-        void Write(int? chunkId, int? subChunkId, IDataReader reader, string tableName);
+        void SaveEntityLookup(int conversionId, CdmVersions cdmVersions, 
+            List<Location> location, 
+            List<CareSite> careSite, 
+            List<Provider> provider, 
+            List<CohortDefinition> cohortDefinition, 
+            List<CdmSource> cdmSource, 
+            List<MetadataOMOP> metadata,
+            List<LocationHistory> locationHistory,
+            List<Cohort> cohortConcepts);
+
+        void AddChunk(int conversionId, List<ChunkRecord> chunk, int index);
+        void Write(int? conversionId, int? chunkId, int? subChunkId, IDataReader reader, string tableName);
         void Write(ChunkData chunk, string table);
         void Commit();
         void Rollback();

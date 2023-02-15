@@ -27,6 +27,9 @@ namespace org.ohdsi.cdm.framework.common.Builder
         private int _costId;
         private int _noteId;
 
+        private int _spId;
+
+        private int _surveyConductId;
         #endregion
 
         #region Properties
@@ -53,6 +56,8 @@ namespace org.ohdsi.cdm.framework.common.Builder
 
         public int ProcedureOccurrenceId => Interlocked.Increment(ref _poId);
 
+        public int SpecimenId => Interlocked.Increment(ref _spId);
+
         public int VisitOccurrenceId => Interlocked.Increment(ref _voId);
         public int VisitDetailId => Interlocked.Increment(ref _vdId);
 
@@ -63,6 +68,8 @@ namespace org.ohdsi.cdm.framework.common.Builder
         public int CostId => Interlocked.Increment(ref _costId);
 
         public int NoteId => Interlocked.Increment(ref _noteId);
+
+        public int SurveyConductId => Interlocked.Increment(ref _surveyConductId);
 
         public bool DrugExposureIdChanged
         {
@@ -148,6 +155,16 @@ namespace org.ohdsi.cdm.framework.common.Builder
         public bool NoteIdChanged
         {
             get { return _noteId > 0; }
+        }
+
+        public bool SpecimenIdChanged
+        {
+            get { return _spId > 0; }
+        }
+
+        public bool SurveyConductIdChanged
+        {
+            get { return _surveyConductId > 0; }
         }
 
         #endregion

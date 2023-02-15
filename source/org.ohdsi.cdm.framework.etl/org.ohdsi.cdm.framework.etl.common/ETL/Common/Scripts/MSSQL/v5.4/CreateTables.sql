@@ -449,14 +449,14 @@ CREATE TABLE {sc}.CDM_SOURCE (
 
 --HINT DISTRIBUTE ON RANDOM
 CREATE TABLE {sc}.COHORT (
-			cohort_definition_id integer NOT NULL,
-			subject_id integer NOT NULL,
+			cohort_definition_id bigint NOT NULL,
+			subject_id bigint NOT NULL,
 			cohort_start_date date NOT NULL,
 			cohort_end_date date NOT NULL );
 
 --HINT DISTRIBUTE ON RANDOM
 CREATE TABLE {sc}.COHORT_DEFINITION (
-			cohort_definition_id integer NOT NULL,
+			cohort_definition_id bigint NOT NULL,
 			cohort_definition_name varchar(255) NOT NULL,
 			cohort_definition_description text NULL,
 			definition_type_concept_id integer NOT NULL,

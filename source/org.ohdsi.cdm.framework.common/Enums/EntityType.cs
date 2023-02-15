@@ -20,6 +20,10 @@
         ObservationPeriod,
         ConditionEra,
         DrugEra,
-        Note
+        Note,
+        FactRelationship,
+        Specimen,
+        SurveyConduct,
+        Episode
     }
 }
