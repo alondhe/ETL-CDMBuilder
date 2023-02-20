@@ -151,7 +151,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
         {
             var connection = _conf[dbType].Replace("{server}", server)
                                                    .Replace("{database}", db)
-                                                   .Replace("{username}", user ?? httppath)
+                                                   .Replace("{username}", user)
+                                                   .Replace("{httppath}", httppath)
                                                    .Replace("{password}", pswd)
                                                    .Replace("{port}", port);
             
@@ -298,15 +299,15 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                     settings.DestinationEngine = "MSSQL";
                 }
 
-                if (settings.SourceEngine.ToLower() == "databricks")
-                {
-                    settings.SourceUser = settings.SourceHttppath;
-                }
+                //if (settings.SourceEngine.ToLower() == "databricks")
+                //{
+                //    settings.SourceUser = settings.SourceHttppath;
+                //}
 
-                if (settings.DestinationEngine.ToLower() == "databricks")
-                {
-                    settings.DestinationUser = settings.DestinationHttppath;
-                }
+                //if (settings.DestinationEngine.ToLower() == "databricks")
+                //{
+                //    settings.DestinationUser = settings.DestinationHttppath;
+                //}
 
                 if (settings.VocabularyEngine == null)
                 {

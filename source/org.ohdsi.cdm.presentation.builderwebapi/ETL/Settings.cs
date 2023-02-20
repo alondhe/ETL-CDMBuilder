@@ -77,7 +77,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                 if (ConversionSettings.DestinationEngine.ToLower() == "mysql")
                     return new MySqlDatabaseEngine();
 
-                if (ConversionSettings.SourceEngine.ToLower().Contains("databricks"))
+                if (ConversionSettings.DestinationEngine.ToLower().Contains("databricks"))
                     return new AzureDatabricksDatabaseEngine();
 
                 return new MssqlDatabaseEngine();
@@ -96,7 +96,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                 if (ConversionSettings.VocabularyEngine.ToLower() == "mysql")
                     return new MySqlDatabaseEngine();
 
-                if (ConversionSettings.SourceEngine.ToLower().Contains("databricks"))
+                if (ConversionSettings.VocabularyEngine.ToLower().Contains("databricks"))
                     return new AzureDatabricksDatabaseEngine();
 
                 return new MssqlDatabaseEngine();
@@ -112,7 +112,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                                            ConversionSettings.SourceDatabase,
                                            ConversionSettings.SourceUser,
                                            ConversionSettings.SourcePassword,
-                                           ConversionSettings.SourcePort.ToString());
+                                           ConversionSettings.SourcePort.ToString(),
+                                           ConversionSettings.SourceHttppath);
             }
         }
 
@@ -125,7 +126,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                                            ConversionSettings.DestinationDatabase,
                                            ConversionSettings.DestinationUser,
                                            ConversionSettings.DestinationPassword,
-                                           ConversionSettings.DestinationPort.ToString());
+                                           ConversionSettings.DestinationPort.ToString(),
+                                           ConversionSettings.DestinationHttppath);
             }
         }
         public string VocabularyConnectionString
@@ -137,7 +139,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                                            ConversionSettings.VocabularyDatabase,
                                            ConversionSettings.VocabularyUser,
                                            ConversionSettings.VocabularyPassword,
-                                           ConversionSettings.VocabularyPort.ToString());
+                                           ConversionSettings.VocabularyPort.ToString(),
+                                           "");
             }
         }
 
@@ -314,10 +317,10 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                 "CreateDestination.sql"
             }));
 
-        private string GetConnectionString(string dbType, string server, string db, string user, string pswd, string port)
+        private string GetConnectionString(string dbType, string server, string db, string user, string pswd, string port, string httppath)
         {
             return _connectionStringTemplates[dbType].Replace("{server}", server).Replace("{database}", db).Replace("{username}", user)
-                .Replace("{password}", pswd).Replace("{port}", port);
+                .Replace("{password}", pswd).Replace("{port}", port).Replace("{httppath}", httppath);
         }
     }
 }
