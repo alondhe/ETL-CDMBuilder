@@ -151,7 +151,8 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
         {
             var connection = _conf[dbType].Replace("{server}", server)
                                                    .Replace("{database}", db)
-                                                   .Replace("{username}", user ?? httppath)
+                                                   .Replace("{username}", user)
+                                                   .Replace("{httppath}", httppath)
                                                    .Replace("{password}", pswd)
                                                    .Replace("{port}", port);
             
