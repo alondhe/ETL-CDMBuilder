@@ -77,7 +77,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                 if (ConversionSettings.DestinationEngine.ToLower() == "mysql")
                     return new MySqlDatabaseEngine();
 
-                if (ConversionSettings.SourceEngine.ToLower().Contains("databricks"))
+                if (ConversionSettings.DestinationEngine.ToLower().Contains("databricks"))
                     return new AzureDatabricksDatabaseEngine();
 
                 return new MssqlDatabaseEngine();
@@ -96,7 +96,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.ETL
                 if (ConversionSettings.VocabularyEngine.ToLower() == "mysql")
                     return new MySqlDatabaseEngine();
 
-                if (ConversionSettings.SourceEngine.ToLower().Contains("databricks"))
+                if (ConversionSettings.VocabularyEngine.ToLower().Contains("databricks"))
                     return new AzureDatabricksDatabaseEngine();
 
                 return new MssqlDatabaseEngine();
