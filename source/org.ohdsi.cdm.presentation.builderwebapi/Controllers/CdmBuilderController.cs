@@ -299,15 +299,15 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                     settings.DestinationEngine = "MSSQL";
                 }
 
-                if (settings.SourceEngine.ToLower() == "databricks")
-                {
-                    settings.SourceUser = settings.SourceHttppath;
-                }
+                //if (settings.SourceEngine.ToLower() == "databricks")
+                //{
+                //    settings.SourceUser = settings.SourceHttppath;
+                //}
 
-                if (settings.DestinationEngine.ToLower() == "databricks")
-                {
-                    settings.DestinationUser = settings.DestinationHttppath;
-                }
+                //if (settings.DestinationEngine.ToLower() == "databricks")
+                //{
+                //    settings.DestinationUser = settings.DestinationHttppath;
+                //}
 
                 if (settings.VocabularyEngine == null)
                 {
