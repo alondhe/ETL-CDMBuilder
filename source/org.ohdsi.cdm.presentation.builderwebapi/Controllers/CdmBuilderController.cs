@@ -321,8 +321,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                 }
 
                 var key = _conf["BuilderSecretKey"];
-                var properties = ConversionSettings.GetProperties(settings);
-
+                settings.PopulateBuildSettings();
+                var properties = ConversionSettings.GetProperties(settings, null);
+               
                 _queue.QueueBackgroundWorkItem(async token =>
                 {
                     await Task.Run(() =>

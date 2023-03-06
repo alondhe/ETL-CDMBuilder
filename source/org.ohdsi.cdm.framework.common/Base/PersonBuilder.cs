@@ -582,9 +582,9 @@ namespace org.ohdsi.cdm.framework.common.Base
 
         private bool WithinTheObservationPeriod(EntityType table)
         {
-            if(_settings.TableSettings != null)
+            if(_settings.Tables != null)
             {
-                var settings = _settings.TableSettings.FirstOrDefault(s => s.Table == table);
+                var settings = _settings.Tables.FirstOrDefault(s => s.Table == table);
 
                 if (settings != null)
                     return settings.WithinTheObservationPeriod;
@@ -1006,9 +1006,9 @@ namespace org.ohdsi.cdm.framework.common.Base
         {
             var gap = 30;
             var conceptId = 38000247;
-            if (_settings.EraSettings != null)
+            if (_settings.Eras != null)
             {
-                var settings = _settings.EraSettings.FirstOrDefault(s => s.Table == EntityType.DrugEra);
+                var settings = _settings.Eras.FirstOrDefault(s => s.Table == EntityType.DrugEra);
                 if (settings != null)
                 {
                     gap = settings.GapWindow;
@@ -1038,9 +1038,9 @@ namespace org.ohdsi.cdm.framework.common.Base
         {
             var gap = 30;
             var conceptId = 38000182;
-            if (_settings.EraSettings != null)
+            if (_settings.Eras != null)
             {
-                var settings = _settings.EraSettings.FirstOrDefault(s => s.Table == EntityType.DrugEra);
+                var settings = _settings.Eras.FirstOrDefault(s => s.Table == EntityType.DrugEra);
                 if(settings != null)
                 {
                     gap = settings.GapWindow;
@@ -1225,9 +1225,9 @@ namespace org.ohdsi.cdm.framework.common.Base
             {
                 var gap = 32;
 
-                if (_settings.EraSettings != null)
+                if (_settings.Eras != null)
                 {
-                    var settings = _settings.EraSettings.FirstOrDefault(s => s.Table == EntityType.ObservationPeriod);
+                    var settings = _settings.Eras.FirstOrDefault(s => s.Table == EntityType.ObservationPeriod);
                     if (settings != null)
                     {
                         gap = settings.GapWindow;
