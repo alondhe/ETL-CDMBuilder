@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Converters;
 using org.ohdsi.cdm.presentation.builderwebapi.Database;
 using System.Net;
 
@@ -55,8 +57,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
                 });
             });
 
-            services.AddControllers();
-
+            services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.Converters.Add(new StringEnumConverter()));
+            services.AddSwaggerGenNewtonsoftSupport();
             services.AddHostedService<ETLService>();
             services.AddHostedService<ConversionService>();
             services.AddHostedService<QueuedHostedService>();
@@ -64,7 +67,10 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddHttpContextAccessor();
 
-          
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CDM Builder", Version = "v1" });
+            });           
 
             DatabaseInitializer.Run(Configuration).Wait();
         }
@@ -92,8 +98,13 @@ namespace org.ohdsi.cdm.presentation.builderwebapi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapSwagger();
             });
-            
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("v1/swagger.json", "CDM Builder v1");
+            });
         }
     }
 }

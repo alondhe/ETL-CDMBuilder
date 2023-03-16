@@ -562,8 +562,8 @@ namespace org.ohdsi.cdm.framework.desktop.Savers
                 Write(chunk, "CONDITION_ERA");
                 Write(chunk, "DEVICE_EXPOSURE");
                 Write(chunk, "MEASUREMENT");
-                Write(chunk, "COHORT");
-                Write(chunk, "COHORT_DEFINITION");
+                //Write(chunk, "COHORT");
+                //Write(chunk, "COHORT_DEFINITION");
 
                 Write(chunk, "CONDITION_OCCURRENCE");
 

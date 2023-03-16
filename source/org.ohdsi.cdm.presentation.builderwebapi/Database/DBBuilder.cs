@@ -115,9 +115,9 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Database
             return parameters;
         }
 
-        public static Dictionary<string, string> GetParameters(string connectionString, string secureKey, int conversionId)
+        public static IEnumerable<Tuple<string, string>> GetParameters(string connectionString, string secureKey, int conversionId)
         {
-            var parameters = new Dictionary<string, string>();
+            var parameters = new List<Tuple<string, string>>();
             var query = "SELECT name, value FROM builder.conversion_parameters WHERE conversion_id = @conversionId";
 
             using var connection = new NpgsqlConnection(connectionString);
@@ -132,7 +132,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Database
                 {
                     try
                     {
-                        parameters.Add(reader[0].ToString(), EncryptProvider.AESDecrypt(reader[1].ToString(), secureKey));
+                        parameters.Add(new Tuple<string, string>(reader[0].ToString(), EncryptProvider.AESDecrypt(reader[1].ToString(), secureKey)));
                     }
                     catch (Exception e)
                     {

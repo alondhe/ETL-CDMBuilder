@@ -15,8 +15,8 @@ namespace org.ohdsi.cdm.framework.common.Base
 
         public bool UseVisitRollupLogic { get; set; }
 
-        public List<EraSetting> EraSettings { get; set; }
-        public List<TableSetting> TableSettings { get; set; }
+        public List<EraSetting> Eras { get; set; }
+        public List<TableSetting> Tables { get; set; }
     }
 
     public class EraSetting
