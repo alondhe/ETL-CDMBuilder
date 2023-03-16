@@ -44,7 +44,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
             var connectionString = $"Server={_conf["SharedDbHost"]};Port={_conf["SharedDbPort"]};Database={_conf["SharedDbName"]};User Id={_conf["SharedDbBuilderUser"]};Password={_conf["SharedDbBuilderPass"]};";
             foreach (var l in DBBuilder.GetLog(connectionString, conversionId, logId))
             {
-                if(l.percent == 100)
+                if (l.percent == 100)
                 {
                     message.statusName = "COMPLETED";
                     message.statusCode = 2;
@@ -80,10 +80,10 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
 
             return "Aborted";
         }
-                
+
         [HttpPost("checksourceconnection")]
-        [HttpPost("/api/checksourceconnection")]
-        [HttpPost("~/api/checksourceconnection")]
+        //[HttpPost("/api/checksourceconnection")]
+        //[HttpPost("~/api/checksourceconnection")]
         public IActionResult CheckSourceConnection([FromBody] ConversionSettings settings)
         {
             try
@@ -155,7 +155,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                                                    .Replace("{httppath}", httppath)
                                                    .Replace("{password}", pswd)
                                                    .Replace("{port}", port);
-            
+
             var databaseType = framework.desktop.Enums.Database.Postgre;
 
             if (dbType.ToLower() == "mssql")
@@ -237,7 +237,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                     string contentKey = data.id;
 
                     Logger.Write(connectionString, new LogMessage { User = username, Type = LogType.Debug, Text = $"AddMappings contentKey {contentKey}" });
-                    
+
                     DBBuilder.StoreParameters(connectionString, key, conversionId.Value, new List<Tuple<string, string>>() { new Tuple<string, string>("ContentKey", contentKey) });
 
                     Logger.Write(connectionString, new LogMessage { User = username, Type = LogType.Debug, Text = $"AddMappings parameters stored" });
@@ -253,7 +253,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                 Logger.Write(connectionString, new LogMessage { User = username, ConversionId = conversionId, Type = LogType.Error, Text = e.Message });
                 return new ConversionLogMessage() { id = conversionId.Value, statusName = "FAILED", statusCode = 4, logs = new List<Message> { new Message { message = e.Message } } };
             }
-                        
+
             return new ConversionLogMessage() { id = conversionId.Value, statusName = "IN_PROGRESS", statusCode = 1 };
         }
 
@@ -323,7 +323,7 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                 var key = _conf["BuilderSecretKey"];
                 settings.PopulateBuildSettings();
                 var properties = ConversionSettings.GetProperties(settings, null);
-               
+
                 _queue.QueueBackgroundWorkItem(async token =>
                 {
                     await Task.Run(() =>
@@ -341,11 +341,11 @@ namespace org.ohdsi.cdm.presentation.builderwebapi.Controllers
                     });
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Logger.Write(connectionString, new LogMessage { User = username, ConversionId = conversionId, Type = LogType.Error, Text = ex.Message });
             }
-  
+
             return await Task.FromResult(new HttpResponseMessage() { StatusCode = HttpStatusCode.OK });
         }
     }   
