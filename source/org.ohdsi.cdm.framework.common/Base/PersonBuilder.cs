@@ -632,12 +632,14 @@ namespace org.ohdsi.cdm.framework.common.Base
                 return new KeyValuePair<Person, Attrition>(null, Attrition.UnknownGender);
             }
 
-            if (_settings.ImplausibleYearOfBirthBefore != 0 && records.All(p => p.YearOfBirth < _settings.ImplausibleYearOfBirthBefore))
+            //if (_settings.ImplausibleYearOfBirthBefore != 0 && records.All(p => p.YearOfBirth < _settings.ImplausibleYearOfBirthBefore))
+            if (_settings.ImplausibleYearOfBirthAfter != 0 && records.All(p => p.YearOfBirth < _settings.ImplausibleYearOfBirthAfter))
             {
                 return new KeyValuePair<Person, Attrition>(null, Attrition.ImplausibleYOBPast);
             }
 
-            if (_settings.ImplausibleYearOfBirthAfter != 0 && records.All(p => p.YearOfBirth > _settings.ImplausibleYearOfBirthAfter))
+            if (_settings.ImplausibleYearOfBirthBefore != 0 && records.All(p => p.YearOfBirth > _settings.ImplausibleYearOfBirthBefore))
+            //if (_settings.ImplausibleYearOfBirthAfter != 0 && records.All(p => p.YearOfBirth > _settings.ImplausibleYearOfBirthAfter))
             {
                 return new KeyValuePair<Person, Attrition>(null, Attrition.ImplausibleYOBFuture);
             }
@@ -675,11 +677,11 @@ namespace org.ohdsi.cdm.framework.common.Base
                 return new KeyValuePair<Person, Attrition>(null, Attrition.GenderChanges); // Gender changed over different enrollment period 
             }
 
-            if (_settings.ImplausibleYearOfBirthBefore != 0 && person.YearOfBirth < _settings.ImplausibleYearOfBirthBefore)
-                return new KeyValuePair<Person, Attrition>(null, Attrition.ImplausibleYOBPast);
+            //if (_settings.ImplausibleYearOfBirthBefore != 0 && person.YearOfBirth < _settings.ImplausibleYearOfBirthBefore)
+            //    return new KeyValuePair<Person, Attrition>(null, Attrition.ImplausibleYOBPast);
 
-            if (_settings.ImplausibleYearOfBirthAfter != 0 && person.YearOfBirth > _settings.ImplausibleYearOfBirthAfter)
-                return new KeyValuePair<Person, Attrition>(null, Attrition.ImplausibleYOBFuture);
+            //if (_settings.ImplausibleYearOfBirthAfter != 0 && person.YearOfBirth > _settings.ImplausibleYearOfBirthAfter)
+            //    return new KeyValuePair<Person, Attrition>(null, Attrition.ImplausibleYOBFuture);
 
             if (!_settings.AllowMultipleYearsOfBirth && records.Where(r => r.YearOfBirth.HasValue && r.YearOfBirth > 1900).Max(r => r.YearOfBirth) -
               records.Where(r => r.YearOfBirth.HasValue && r.YearOfBirth > 1900).Min(r => r.YearOfBirth) > 2)
